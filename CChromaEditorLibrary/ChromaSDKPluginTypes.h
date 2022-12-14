@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 #include "RzChromaSDKDefines.h"
 #include "RzChromaSDKTypes.h"
@@ -42,6 +43,7 @@ namespace ChromaSDK
 		DE_Keyboard = 0,
 		DE_Keypad,
 		DE_Mouse,
+		DE_KeyboardExtended,
 	};
 
 	enum class EChromaSDKDeviceEnum
@@ -52,6 +54,7 @@ namespace ChromaSDK
 		DE_Keypad,
 		DE_Mouse,
 		DE_Mousepad,
+		DE_KeyboardExtended,
 		DE_MAX
 	};
 
@@ -263,10 +266,11 @@ namespace ChromaSDK
 	struct FChromaSDKColorFrame2D
 	{
 		std::vector<FChromaSDKColors> Colors;
+		std::vector<FChromaSDKColors> Keys;
 
 		float Duration;
 
-		FChromaSDKColorFrame2D();
+		FChromaSDKColorFrame2D(const EChromaSDKDevice2DEnum device);
 		FChromaSDKColorFrame2D(const FChromaSDKColorFrame2D& copy);
 	};
 }

@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "CChromaEditorLibrary.h"
 #include "ColorButton.h"
+#include "ChromaLogger.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -23,6 +24,7 @@
 #define DEVICE_CHROMA_LINK "ChromaLink"
 #define DEVICE_HEADSET "Headset"
 #define DEVICE_KEYBOARD "Keyboard"
+#define DEVICE_KEYBOARD_EXTENDED "KeyboardExtended"
 #define DEVICE_KEYPAD "Keypad"
 #define DEVICE_MOUSE "Mouse"
 #define DEVICE_MOUSEPAD "Mousepad"
@@ -86,6 +88,9 @@ BOOL CCChromaEditorLibraryApp::InitInstance()
 CMainViewDlg::CMainViewDlg() : CDialogEx(IDD_MAIN_VIEW)
 {
 	_mDialogInitialized = false; //must be first
+	_mIndexLed = -1;
+	_mIndexRow = -1;
+	_mIndexColumn = -1;
 	SetPath("");
 	_mPlayOnOpen = false;
 }
@@ -110,7 +115,7 @@ void CMainViewDlg::LoadFile()
 {
 	if (_mPath.empty())
 	{
-		fprintf(stderr, "LoadFile: Path cannot be empty! Using `%s` instead.\r\n", TEMP_FILE);
+		ChromaLogger::fprintf(stderr, "LoadFile: Path cannot be empty! Using `%s` instead.\r\n", TEMP_FILE);
 		SetPath(TEMP_FILE);
 	}
 	
@@ -139,7 +144,7 @@ void CMainViewDlg::LoadFile()
 			delete animation;
 			break;
 		default:
-			fprintf(stderr, "LoadFile: Unexpected animation type!");
+			ChromaLogger::fprintf(stderr, "LoadFile: Unexpected animation type!");
 			return;
 		}
 	}
@@ -151,7 +156,7 @@ void CMainViewDlg::SaveFile()
 	int result = fopen_s(&stream, _mPath.c_str(), "wb");
 	if (result == 13)
 	{
-		fprintf(stderr, "SaveFile: Permission denied!\r\n");
+		ChromaLogger::fprintf(stderr, "SaveFile: Permission denied!\r\n");
 		return;
 	}
 	else if (0 == result &&
@@ -166,17 +171,17 @@ void CMainViewDlg::SaveFile()
 		write = fwrite(&version, expectedSize, 1, stream);
 		if (expectedWrite != write)
 		{
-			fprintf(stderr, "SaveFile: Failed to write version!\r\n");
+			ChromaLogger::fprintf(stderr, "SaveFile: Failed to write version!\r\n");
 			std::fclose(stream);
 			return;
 		}
 
 		//device
-		byte device = 0;
+		BYTE device = 0;
 
 		//device type
-		byte deviceType = (byte)_mDeviceType;
-		expectedSize = sizeof(byte);
+		BYTE deviceType = (BYTE)_mDeviceType;
+		expectedSize = sizeof(BYTE);
 		fwrite(&deviceType, expectedSize, 1, stream);
 
 		//device
@@ -385,7 +390,16 @@ float CMainViewDlg::GetDuration()
 
 void CMainViewDlg::RefreshDevice()
 {
+	_mIndexLed = -1;
+	_mIndexRow = -1;
+	_mIndexColumn = -1;
+
 	int show = _mDeviceType == EChromaSDKDeviceTypeEnum::DE_2D && _mEdit2D.GetDevice() == EChromaSDKDevice2DEnum::DE_Keyboard;
+	GetControlSetKeyLabel()->ShowWindow(show);
+	GetControlSetKeyCombo()->ShowWindow(show);
+	GetControlSetKeyButton()->ShowWindow(show);
+
+	show = _mDeviceType == EChromaSDKDeviceTypeEnum::DE_2D && _mEdit2D.GetDevice() == EChromaSDKDevice2DEnum::DE_KeyboardExtended;
 	GetControlSetKeyLabel()->ShowWindow(show);
 	GetControlSetKeyCombo()->ShowWindow(show);
 	GetControlSetKeyButton()->ShowWindow(show);
@@ -399,6 +413,7 @@ void CMainViewDlg::RefreshDevice()
 	GetControlListTypes()->AddString(_T(DEVICE_CHROMA_LINK));
 	GetControlListTypes()->AddString(_T(DEVICE_HEADSET));
 	GetControlListTypes()->AddString(_T(DEVICE_KEYBOARD));
+	GetControlListTypes()->AddString(_T(DEVICE_KEYBOARD_EXTENDED));
 	GetControlListTypes()->AddString(_T(DEVICE_KEYPAD));
 	GetControlListTypes()->AddString(_T(DEVICE_MOUSE));
 	GetControlListTypes()->AddString(_T(DEVICE_MOUSEPAD));
@@ -410,13 +425,13 @@ void CMainViewDlg::RefreshDevice()
 		switch (_mEdit1D.GetDevice())
 		{
 		case EChromaSDKDevice1DEnum::DE_ChromaLink:
-			index = (int)EChromaSDKDeviceEnum::DE_ChromaLink;
+			index = 0;
 			break;
 		case EChromaSDKDevice1DEnum::DE_Headset:
-			index = (int)EChromaSDKDeviceEnum::DE_Headset;
+			index = 1;
 			break;
 		case EChromaSDKDevice1DEnum::DE_Mousepad:
-			index = (int)EChromaSDKDeviceEnum::DE_Mousepad;
+			index = 6;
 			break;
 		}
 		break;
@@ -424,13 +439,16 @@ void CMainViewDlg::RefreshDevice()
 		switch (_mEdit2D.GetDevice())
 		{
 		case EChromaSDKDevice2DEnum::DE_Keyboard:
-			index = (int)EChromaSDKDeviceEnum::DE_Keyboard;
+			index = 2;
+			break;
+		case EChromaSDKDevice2DEnum::DE_KeyboardExtended:
+			index = 3;
 			break;
 		case EChromaSDKDevice2DEnum::DE_Keypad:
-			index = (int)EChromaSDKDeviceEnum::DE_Keypad;
+			index = 4;
 			break;
 		case EChromaSDKDevice2DEnum::DE_Mouse:
-			index = (int)EChromaSDKDeviceEnum::DE_Mouse;
+			index = 5;
 			break;
 		}
 		break;
@@ -514,14 +532,28 @@ void CMainViewDlg::RefreshGrid()
 	case EChromaSDKDeviceTypeEnum::DE_1D:
 		{
 			int maxLeds = ChromaSDKPlugin::GetInstance()->GetMaxLeds(_mEdit1D.GetDevice());
-			sprintf_s(buffer, "1 x %d", maxLeds);
+			if (_mIndexLed >= 0)
+			{
+				sprintf_s(buffer, "1 x %d (%d)", maxLeds, _mIndexLed);
+			}
+			else
+			{
+				sprintf_s(buffer, "1 x %d", maxLeds);
+			}
 		}
 		break;
 	case EChromaSDKDeviceTypeEnum::DE_2D:
 		{
 			int maxRow = ChromaSDKPlugin::GetInstance()->GetMaxRow(_mEdit2D.GetDevice());
 			int maxColumn = ChromaSDKPlugin::GetInstance()->GetMaxColumn(_mEdit2D.GetDevice());
-			sprintf_s(buffer, "%d x %d", maxRow, maxColumn);
+			if (_mIndexRow >= 0 && _mIndexColumn >= 0)
+			{
+				sprintf_s(buffer, "%d x %d (%d, %d)", maxRow, maxColumn, _mIndexRow, _mIndexColumn);
+			}
+			else
+			{
+				sprintf_s(buffer, "%d x %d", maxRow, maxColumn);
+			}
 		}
 		break;
 	}
@@ -553,6 +585,7 @@ void CMainViewDlg::RefreshGrid()
 					CColorButton* button = buttons[id];
 					if (button)
 					{
+						button->SetIndex(i, -1, -1);
 						COLORREF color = frame.Colors[i];
 						button->SetColor(color, color);
 						button->Invalidate();
@@ -586,7 +619,9 @@ void CMainViewDlg::RefreshGrid()
 						CColorButton* button = buttons[id];
 						if (button)
 						{
+							button->SetIndex(-1, i, j);
 							COLORREF color = row.Colors[j];
+							color = color & 0xFFFFFF;
 							button->SetColor(color, color);
 							button->Invalidate();
 						}
@@ -620,7 +655,7 @@ void CMainViewDlg::RefreshFrames()
 
 	sprintf_s(bufferFrameInfo, "%d", currentFrame + 1);
 	GetControlFrameIndex()->SetWindowText(CString(bufferFrameInfo));
-
+	
 	sprintf_s(bufferFrameInfo, "%d of %d", currentFrame + 1, frameCount);
 	GetControlFrames()->SetWindowText(CString(bufferFrameInfo));
 
@@ -701,7 +736,7 @@ void CMainViewDlg::SetPath(const string& path)
 
 BOOL CMainViewDlg::OnInitDialog()
 {
-	GetControlVersion()->SetWindowTextW(_T("Version: 1.5"));
+	GetControlVersion()->SetWindowTextW(_T("Version: 1.13"));
 
 	_mDialogInitialized = true;
 
@@ -730,7 +765,7 @@ BOOL CMainViewDlg::OnInitDialog()
 	GetControlSetKeyCombo()->SetCurSel(0);
 
 	// setup mouse chars
-	for (int led = EChromaSDKMouseLED::ML_SCROLLWHEEL; led <= EChromaSDKMouseLED::ML_RIGHT_SIDE7; ++led)
+	for (int led = (int)EChromaSDKMouseLED::ML_SCROLLWHEEL; led <= (int)EChromaSDKMouseLED::ML_RIGHT_SIDE7; ++led)
 	{
 		const char* strLed = ChromaSDKPlugin::GetInstance()->GetMouseChar((EChromaSDKMouseLED)led);
 		GetControlSetLEDCombo()->AddString(CString(strLed));
@@ -812,6 +847,11 @@ BOOL CMainViewDlg::OnInitDialog()
 
 void CMainViewDlg::OnTextChangeFrameIndex()
 {
+	if (GetControlFrameIndex() != GetControlFrameIndex()->GetFocus())
+	{
+		return; //changed through code
+	}
+
 	//update frames label
 	char bufferFrameInfo[48] = { 0 };
 	int currentFrame = GetCurrentFrame();
@@ -995,7 +1035,7 @@ BOOL CMainViewDlg::PreTranslateMessage(MSG* pMsg)
 				OnSliderBrushIntensity();
 				break;
 			default:
-				fprintf(stdout, "Pressed: %d\r\n", pMsg->wParam);
+				ChromaLogger::printf("Pressed: %d\r\n", pMsg->wParam);
 				break;
 			}
 		}
@@ -1362,7 +1402,11 @@ void CMainViewDlg::OnBnClickedButtonColor(UINT nID)
 			{
 				COLORREF color = 0;
 				CColorButton* button = buttons[index];
-				if (!_mShiftModifier)
+
+				button->GetIndex(_mIndexLed, _mIndexRow, _mIndexColumn);
+
+				// capture color
+				if (!_mShiftModifier && !_mControlModifier)
 				{
 					color = GetColor();
 					button->SetColor(color, color);
@@ -1386,6 +1430,32 @@ void CMainViewDlg::OnBnClickedButtonColor(UINT nID)
 						{
 							FChromaSDKColorFrame1D& frame = frames[currentFrame];
 							int i = index;
+
+							// invert color
+							if (_mControlModifier)
+							{
+								color = frame.Colors[i];
+								int red = color & 0xFF;
+								int green = (color >> 8) & 0xFF;
+								int blue = (color >> 16) & 0xFF;
+								// invert
+								red = 255 - red;
+								green = 255 - green;
+								blue = 255 - blue;
+								color = red | (green << 8) | (blue << 16);
+								frame.Colors[i] = color;
+								button->SetColor(color, color);
+								button->Invalidate();
+							}
+
+							// set color
+							if (!_mShiftModifier && !_mControlModifier)
+							{
+								frame.Colors[i] = color;
+								RefreshGrid();
+							}
+
+							// capture ccolor
 							if (_mShiftModifier)
 							{
 								color = frame.Colors[i];
@@ -1393,11 +1463,6 @@ void CMainViewDlg::OnBnClickedButtonColor(UINT nID)
 								GetColorButtons()[0]->SetColor(color, color);
 								GetColorButtons()[0]->Invalidate();
 								OnSliderBrushIntensity();
-							}
-							else
-							{
-								frame.Colors[i] = color;
-								RefreshGrid();
 							}
 						}
 					}
@@ -1420,6 +1485,32 @@ void CMainViewDlg::OnBnClickedButtonColor(UINT nID)
 							int i = index / maxColumn;
 							FChromaSDKColors& row = frame.Colors[i];
 							int j = index - i * maxColumn;
+
+							// invert color
+							if (_mControlModifier)
+							{
+								color = row.Colors[j];
+								int red = color & 0xFF;
+								int green = (color >> 8) & 0xFF;
+								int blue = (color >> 16) & 0xFF;
+								// invert
+								red = 255 - red;
+								green = 255 - green;
+								blue = 255 - blue;
+								color = red | (green << 8) | (blue << 16);
+								row.Colors[j] = color;
+								button->SetColor(color, color);
+								button->Invalidate();
+							}
+
+							// set color
+							if (!_mShiftModifier && !_mControlModifier)
+							{
+								row.Colors[j] = color;
+								RefreshGrid();
+							}
+
+							// capture ccolor
 							if (_mShiftModifier)
 							{
 								color = row.Colors[j];
@@ -1427,12 +1518,7 @@ void CMainViewDlg::OnBnClickedButtonColor(UINT nID)
 								GetColorButtons()[0]->SetColor(color, color);
 								GetColorButtons()[0]->Invalidate();
 								OnSliderBrushIntensity();
-							}
-							else
-							{
-								row.Colors[j] = color;
-								RefreshGrid();
-							}
+							}							
 						}
 					}
 					break;
@@ -1481,24 +1567,27 @@ void CMainViewDlg::OnSelChangeListTypes()
 
 	EChromaSDKDeviceTypeEnum deviceType = EChromaSDKDeviceTypeEnum::DE_1D;
 	int index = GetControlListTypes()->GetCurSel();
-	switch ((EChromaSDKDeviceEnum)index)
+	switch (index)
 	{
-	case EChromaSDKDeviceEnum::DE_ChromaLink:
+	case 0: //ChromaLink
 		deviceType = EChromaSDKDeviceTypeEnum::DE_1D;
 		break;
-	case EChromaSDKDeviceEnum::DE_Headset:
+	case 1: //Headset
 		deviceType = EChromaSDKDeviceTypeEnum::DE_1D;
 		break;
-	case EChromaSDKDeviceEnum::DE_Keyboard:
+	case 2: //Keyboard
 		deviceType = EChromaSDKDeviceTypeEnum::DE_2D;
 		break;
-	case EChromaSDKDeviceEnum::DE_Keypad:
+	case 3: //KeyboardExtended
 		deviceType = EChromaSDKDeviceTypeEnum::DE_2D;
 		break;
-	case EChromaSDKDeviceEnum::DE_Mouse:
+	case 4: //Keypad
 		deviceType = EChromaSDKDeviceTypeEnum::DE_2D;
 		break;
-	case EChromaSDKDeviceEnum::DE_Mousepad:
+	case 5: //Mouse
+		deviceType = EChromaSDKDeviceTypeEnum::DE_2D;
+		break;
+	case 6: //Mousepad
 		deviceType = EChromaSDKDeviceTypeEnum::DE_1D;
 		break;
 	}
@@ -1528,24 +1617,34 @@ void CMainViewDlg::OnSelChangeListTypes()
 
 	EChromaSDKDevice1DEnum device1D = EChromaSDKDevice1DEnum::DE_ChromaLink;
 	EChromaSDKDevice2DEnum device2D = EChromaSDKDevice2DEnum::DE_Keyboard;
-	switch ((EChromaSDKDeviceEnum)index)
+	switch (index)
 	{
-	case EChromaSDKDeviceEnum::DE_ChromaLink:
+	//chromalink
+	case 0:
 		device1D = EChromaSDKDevice1DEnum::DE_ChromaLink;
 		break;
-	case EChromaSDKDeviceEnum::DE_Headset:
+	//headset
+	case 1:
 		device1D = EChromaSDKDevice1DEnum::DE_Headset;
 		break;
-	case EChromaSDKDeviceEnum::DE_Keyboard:
+	//keyboard
+	case 2:
 		device2D = EChromaSDKDevice2DEnum::DE_Keyboard;
 		break;
-	case EChromaSDKDeviceEnum::DE_Keypad:
+	//keyboard extended
+	case 3:
+		device2D = EChromaSDKDevice2DEnum::DE_KeyboardExtended;
+		break;
+	// keypad
+	case 4:
 		device2D = EChromaSDKDevice2DEnum::DE_Keypad;
 		break;
-	case EChromaSDKDeviceEnum::DE_Mouse:
+	// mouse
+	case 5:
 		device2D = EChromaSDKDevice2DEnum::DE_Mouse;
 		break;
-	case EChromaSDKDeviceEnum::DE_Mousepad:
+	// mousepad
+	case 6:
 		device1D = EChromaSDKDevice1DEnum::DE_Mousepad;
 		break;
 	}
@@ -2127,7 +2226,7 @@ void CMainViewDlg::OnBnClickedButtonPreview()
 			if (currentFrame < frames.size())
 			{
 				FChromaSDKColorFrame2D& frame = frames[currentFrame];
-				FChromaSDKEffectResult result = ChromaSDKPlugin::GetInstance()->CreateEffectCustom2D(device, frame.Colors);
+				FChromaSDKEffectResult result = ChromaSDKPlugin::GetInstance()->CreateEffectCustom2D(device, frame.Colors, frame.Keys);
 				if (result.Result == 0)
 				{
 					ChromaSDKPlugin::GetInstance()->SetEffect(result.EffectId);
@@ -2487,7 +2586,7 @@ void CMainViewDlg::OnBnClickedButtonDelete()
 			vector<FChromaSDKColorFrame2D>& frames = _mEdit2D.GetFrames();
 			if (frames.size() == 1)
 			{
-				FChromaSDKColorFrame2D frame = FChromaSDKColorFrame2D();
+				FChromaSDKColorFrame2D frame = FChromaSDKColorFrame2D(_mEdit2D.GetDevice());
 				frame.Colors = ChromaSDKPlugin::GetInstance()->CreateColors2D(_mEdit2D.GetDevice());
 				frames[0] = frame;
 			}

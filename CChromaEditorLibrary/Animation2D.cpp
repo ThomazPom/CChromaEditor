@@ -2,6 +2,7 @@
 #include "Animation2D.h"
 #include "ChromaSDKPlugin.h"
 #include "ChromaThread.h"
+#include "ChromaLogger.h"
 
 #define ANIMATION_VERSION 1
 
@@ -33,7 +34,7 @@ Animation2D& Animation2D::operator=(const Animation2D& rhs)
 void Animation2D::Reset()
 {
 	_mFrames.clear();
-	FChromaSDKColorFrame2D frame = FChromaSDKColorFrame2D();
+	FChromaSDKColorFrame2D frame = FChromaSDKColorFrame2D(_mDevice);
 	frame.Colors = ChromaSDKPlugin::GetInstance()->CreateColors2D(_mDevice);
 	_mFrames.push_back(frame);
 
@@ -106,24 +107,41 @@ void Animation2D::Load()
 		try
 		{
 			FChromaSDKEffectResult effect;
-			if (_mDevice == EChromaSDKDevice2DEnum::DE_Keyboard &&
-				_mUseChromaCustom)
+			switch (_mDevice)
 			{
-				effect = ChromaSDKPlugin::GetInstance()->CreateEffectKeyboardCustom2D(frame.Colors);
-			}
-			else
-			{
-				effect = ChromaSDKPlugin::GetInstance()->CreateEffectCustom2D(_mDevice, frame.Colors);
-			}
+			case EChromaSDKDevice2DEnum::DE_Keyboard:
+				if (_mUseChromaCustom)
+				{
+					effect = ChromaSDKPlugin::GetInstance()->CreateEffectKeyboardCustom2D(frame.Colors, frame.Keys);
+				}
+				else
+				{
+					effect = ChromaSDKPlugin::GetInstance()->CreateEffectCustom2D(_mDevice, frame.Colors, frame.Keys);
+				}
+				break;
+			case EChromaSDKDevice2DEnum::DE_KeyboardExtended:
+				if (_mUseChromaCustom)
+				{
+					effect = ChromaSDKPlugin::GetInstance()->CreateEffectKeyboardExtendedCustom2D(frame.Colors, frame.Keys);
+				}
+				else
+				{
+					effect = ChromaSDKPlugin::GetInstance()->CreateEffectCustom2D(_mDevice, frame.Colors, frame.Keys);
+				}
+				break;
+			default:
+				effect = ChromaSDKPlugin::GetInstance()->CreateEffectCustom2D(_mDevice, frame.Colors, frame.Keys);
+				break;
+			}			
 			if (effect.Result != 0)
 			{
-				fprintf(stderr, "Load: Failed to create effect!\r\n");
+				ChromaLogger::fprintf(stderr, "Load: Failed to create effect!\r\n");
 			}
 			_mEffects.push_back(effect);
 		}
 		catch (exception)
 		{
-			fprintf(stderr, "Load: Exception in create effect!\r\n");
+			ChromaLogger::fprintf(stderr, "Load: Exception in create effect!\r\n");
 			FChromaSDKEffectResult result = FChromaSDKEffectResult();
 			result.Result = -1;
 			_mEffects.push_back(result);
@@ -148,12 +166,12 @@ void Animation2D::Unload()
 			int result = ChromaSDKPlugin::GetInstance()->DeleteEffect(effect.EffectId);
 			if (result != 0)
 			{
-				fprintf(stderr, "Unload: Failed to delete effect!\r\n");
+				ChromaLogger::fprintf(stderr, "Unload: Failed to delete effect!\r\n");
 			}
 		}
 		catch (exception)
 		{
-			fprintf(stderr, "Unload: Exception in delete effect!\r\n");
+			ChromaLogger::fprintf(stderr, "Unload: Exception in delete effect!\r\n");
 		}
 	}
 	_mEffects.clear();
@@ -223,12 +241,12 @@ void Animation2D::InternalShowFrame()
 				int result = ChromaSDKPlugin::GetInstance()->SetEffect(effect.EffectId);
 				if (result != 0)
 				{
-					fprintf(stderr, "InternalShowFrame: Failed to set effect!\r\n");
+					ChromaLogger::fprintf(stderr, "InternalShowFrame: Failed to set effect!\r\n");
 				}
 			}
 			catch (exception)
 			{
-				fprintf(stderr, "InternalShowFrame: Exception in set effect!\r\n");
+				ChromaLogger::fprintf(stderr, "InternalShowFrame: Exception in set effect!\r\n");
 			}
 		}
 	}
@@ -241,15 +259,32 @@ void Animation2D::InternalShowFrame()
 			try
 			{
 				FChromaSDKEffectResult effect;
-				if (_mDevice == EChromaSDKDevice2DEnum::DE_Keyboard &&
-					_mUseChromaCustom)
+				switch (_mDevice)
 				{
-					effect = ChromaSDKPlugin::GetInstance()->CreateEffectKeyboardCustom2D(frame.Colors);
-				}
-				else
-				{
-					effect = ChromaSDKPlugin::GetInstance()->CreateEffectCustom2D(_mDevice, frame.Colors);
-				}
+				case EChromaSDKDevice2DEnum::DE_Keyboard:
+					if (_mUseChromaCustom)
+					{
+						effect = ChromaSDKPlugin::GetInstance()->CreateEffectKeyboardCustom2D(frame.Colors, frame.Keys);
+					}
+					else
+					{
+						effect = ChromaSDKPlugin::GetInstance()->CreateEffectCustom2D(_mDevice, frame.Colors, frame.Keys);
+					}
+					break;
+				case EChromaSDKDevice2DEnum::DE_KeyboardExtended:
+					if (_mUseChromaCustom)
+					{
+						effect = ChromaSDKPlugin::GetInstance()->CreateEffectKeyboardExtendedCustom2D(frame.Colors, frame.Keys);
+					}
+					else
+					{
+						effect = ChromaSDKPlugin::GetInstance()->CreateEffectCustom2D(_mDevice, frame.Colors, frame.Keys);
+					}
+					break;
+				default:
+					effect = ChromaSDKPlugin::GetInstance()->CreateEffectCustom2D(_mDevice, frame.Colors, frame.Keys);
+					break;
+				}				
 				if (effect.Result == RZRESULT_SUCCESS)
 				{
 					ChromaSDKPlugin::GetInstance()->SetEffect(effect.EffectId);
@@ -258,7 +293,7 @@ void Animation2D::InternalShowFrame()
 			}
 			catch (exception)
 			{
-				fprintf(stderr, "InternalShowFrame: Exception in set effect!\r\n");
+				ChromaLogger::fprintf(stderr, "InternalShowFrame: Exception in set effect!\r\n");
 			}
 		}
 	}
@@ -292,7 +327,7 @@ void Animation2D::InternalUpdate(float deltaTime)
 				}
 				else
 				{
-					//fprintf(stdout, "Update: Animation Complete.\r\n");
+					//ChromaLogger::printf("Update: Animation Complete.\r\n");
 					_mIsPlaying = false;
 					_mTime = 0.0f;
 					_mCurrentFrame = 0;
@@ -310,7 +345,7 @@ void Animation2D::ResetFrames()
 		auto it = _mFrames.begin();
 		_mFrames.erase(it);
 	}
-	FChromaSDKColorFrame2D frame = FChromaSDKColorFrame2D();
+	FChromaSDKColorFrame2D frame = FChromaSDKColorFrame2D(_mDevice);
 	frame.Colors = ChromaSDKPlugin::GetInstance()->CreateColors2D(_mDevice);
 	frame.Duration = 1;
 	_mFrames.push_back(frame);
@@ -322,7 +357,7 @@ int Animation2D::Save(const char* path)
 	int result = fopen_s(&stream, path, "wb");
 	if (result == 13)
 	{
-		fprintf(stderr, "Save: Permission denied! %s\r\n", path);
+		ChromaLogger::fprintf(stderr, "Save: Permission denied! %s\r\n", path);
 		return - 1;
 	}
 	else if (0 == result &&
@@ -337,14 +372,14 @@ int Animation2D::Save(const char* path)
 		write = fwrite(&version, expectedSize, 1, stream);
 		if (expectedWrite != write)
 		{
-			fprintf(stderr, "Save: Failed to write version!\r\n");
+			ChromaLogger::fprintf(stderr, "Save: Failed to write version!\r\n");
 			std::fclose(stream);
 			return -1;
 		}
 
 		//device type
-		byte deviceType = (byte)EChromaSDKDeviceTypeEnum::DE_2D;
-		expectedSize = sizeof(byte);
+		BYTE deviceType = (BYTE)EChromaSDKDeviceTypeEnum::DE_2D;
+		expectedSize = sizeof(BYTE);
 		fwrite(&deviceType, expectedSize, 1, stream);
 
 		switch ((EChromaSDKDeviceTypeEnum)deviceType)
@@ -358,7 +393,7 @@ int Animation2D::Save(const char* path)
 		}
 
 		//device
-		byte device = (byte)_mDevice;
+		BYTE device = (BYTE)_mDevice;
 		fwrite(&device, expectedSize, 1, stream);
 
 		switch ((EChromaSDKDevice2DEnum)device)

@@ -5,7 +5,8 @@
 using namespace ChromaSDK;
 using namespace std;
 
-EditorAnimation2D::EditorAnimation2D()
+EditorAnimation2D::EditorAnimation2D() :
+	_mFrameCopy(EChromaSDKDevice2DEnum::DE_Keyboard)
 {
 	Reset();
 }
@@ -105,13 +106,13 @@ void EditorAnimation2D::CopyPixels(COLORREF* pColor, const UINT width, const UIN
 
 	//scale pixels
 	std::vector<FChromaSDKColors>& colors = _mFrameCopy.Colors;
-	for (int i = 0; i < _mFrameCopy.Colors.size(); ++i)
+	for (unsigned int i = 0; i < _mFrameCopy.Colors.size(); ++i)
 	{
-		int a = (i / (float)_mFrameCopy.Colors.size()) * height;
+		int a = (int)(i / (float)_mFrameCopy.Colors.size()) * height;
 		FChromaSDKColors& row = _mFrameCopy.Colors[i];
-		for (int j = 0; j < row.Colors.size(); ++j)
+		for (unsigned int j = 0; j < row.Colors.size(); ++j)
 		{
-			int b = (j / (float)row.Colors.size()) * width;
+			int b = (int)(j / (float)row.Colors.size()) * width;
 			row.Colors[j] = rows[a][b];
 		}
 	}
@@ -139,7 +140,7 @@ void EditorAnimation2D::AddFrame()
 	}
 
 	vector<FChromaSDKColorFrame2D>& frames = GetFrames();
-	FChromaSDKColorFrame2D frame = FChromaSDKColorFrame2D();
+	FChromaSDKColorFrame2D frame = FChromaSDKColorFrame2D(GetDevice());
 	frame.Colors = ChromaSDKPlugin::GetInstance()->CreateColors2D(GetDevice());
 
 	if (currentFrame == GetFrameCount())

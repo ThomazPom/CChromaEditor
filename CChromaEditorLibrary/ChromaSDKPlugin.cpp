@@ -253,31 +253,31 @@ ChromaSDKPlugin::ChromaSDKPlugin()
 	_mKeyboardCharMap[EChromaSDKKeyboardKey::KK_MACRO3] = "Macro Key 3";
 	_mKeyboardCharMap[EChromaSDKKeyboardKey::KK_MACRO4] = "Macro Key 4";
 	_mKeyboardCharMap[EChromaSDKKeyboardKey::KK_MACRO5] = "Macro Key 5";
-	_mKeyboardCharMap[EChromaSDKKeyboardKey::KK_OEM_1] = "~ (tilde/半角/全角) (VK_OEM_3)";
+	_mKeyboardCharMap[EChromaSDKKeyboardKey::KK_OEM_1] = "~ (tilde)";
 	_mKeyboardCharMap[EChromaSDKKeyboardKey::KK_OEM_2] = "-- (minus) (VK_OEM_MINUS)";
 	_mKeyboardCharMap[EChromaSDKKeyboardKey::KK_OEM_3] = "= (equal) (VK_OEM_PLUS)";
 	_mKeyboardCharMap[EChromaSDKKeyboardKey::KK_OEM_4] = "[ (left sqaure bracket) (VK_OEM_4)";
 	_mKeyboardCharMap[EChromaSDKKeyboardKey::KK_OEM_5] = "] (right square bracket) (VK_OEM_6)";
-	_mKeyboardCharMap[EChromaSDKKeyboardKey::KK_OEM_6] = "\ (backslash) (VK_OEM_5)";
+	_mKeyboardCharMap[EChromaSDKKeyboardKey::KK_OEM_6] = "\\ (backslash) (VK_OEM_5)";
 	_mKeyboardCharMap[EChromaSDKKeyboardKey::KK_OEM_7] = "; (semi-colon) (VK_OEM_1)";
 	_mKeyboardCharMap[EChromaSDKKeyboardKey::KK_OEM_8] = "' (apostrophe) (VK_OEM_7)";
 	_mKeyboardCharMap[EChromaSDKKeyboardKey::KK_OEM_9] = ", (comma) (VK_OEM_COMMA)";
 	_mKeyboardCharMap[EChromaSDKKeyboardKey::KK_OEM_10] = ". (period) (VK_OEM_PERIOD)";
 	_mKeyboardCharMap[EChromaSDKKeyboardKey::KK_OEM_11] = "/ (forward slash) (VK_OEM_2)";
-	_mKeyboardCharMap[EChromaSDKKeyboardKey::KK_EUR_1] = "# (VK_OEM_5)";
-	_mKeyboardCharMap[EChromaSDKKeyboardKey::KK_EUR_2] = "\ (VK_OEM_102)";
-	_mKeyboardCharMap[EChromaSDKKeyboardKey::KK_JPN_1] = "¥ (0xFF)";
-	_mKeyboardCharMap[EChromaSDKKeyboardKey::KK_JPN_2] = "\ (0xC1)";
-	_mKeyboardCharMap[EChromaSDKKeyboardKey::KK_JPN_3] = "無変換 (VK_OEM_PA1)";
-	_mKeyboardCharMap[EChromaSDKKeyboardKey::KK_JPN_4] = "変換 (0xFF)";
-	_mKeyboardCharMap[EChromaSDKKeyboardKey::KK_JPN_5] = "ひらがな/カタカナ (0xFF)";
-	_mKeyboardCharMap[EChromaSDKKeyboardKey::KK_KOR_1] = "| (0xFF)";
-	_mKeyboardCharMap[EChromaSDKKeyboardKey::KK_KOR_2] = "(VK_OEM_5)";
-	_mKeyboardCharMap[EChromaSDKKeyboardKey::KK_KOR_3] = "(VK_OEM_102)";
-	_mKeyboardCharMap[EChromaSDKKeyboardKey::KK_KOR_4] = "(0xC1)";
-	_mKeyboardCharMap[EChromaSDKKeyboardKey::KK_KOR_5] = "(VK_OEM_PA1)";
-	_mKeyboardCharMap[EChromaSDKKeyboardKey::KK_KOR_6] = "한/영 (0xFF)";
-	_mKeyboardCharMap[EChromaSDKKeyboardKey::KK_KOR_7] = "(0xFF)";
+	_mKeyboardCharMap[EChromaSDKKeyboardKey::KK_EUR_1] = "KK_EUR_1";
+	_mKeyboardCharMap[EChromaSDKKeyboardKey::KK_EUR_2] = "KK_EUR_2";
+	_mKeyboardCharMap[EChromaSDKKeyboardKey::KK_JPN_1] = "KK_JPN_1";
+	_mKeyboardCharMap[EChromaSDKKeyboardKey::KK_JPN_2] = "KK_JPN_2";
+	_mKeyboardCharMap[EChromaSDKKeyboardKey::KK_JPN_3] = "KK_JPN_3";
+	_mKeyboardCharMap[EChromaSDKKeyboardKey::KK_JPN_4] = "KK_JPN_4";
+	_mKeyboardCharMap[EChromaSDKKeyboardKey::KK_JPN_5] = "KK_JPN_5";
+	_mKeyboardCharMap[EChromaSDKKeyboardKey::KK_KOR_1] = "KK_KOR_1";
+	_mKeyboardCharMap[EChromaSDKKeyboardKey::KK_KOR_2] = "KK_KOR_2";
+	_mKeyboardCharMap[EChromaSDKKeyboardKey::KK_KOR_3] = "KK_KOR_3";
+	_mKeyboardCharMap[EChromaSDKKeyboardKey::KK_KOR_4] = "KK_KOR_4";
+	_mKeyboardCharMap[EChromaSDKKeyboardKey::KK_KOR_5] = "KK_KOR_5";
+	_mKeyboardCharMap[EChromaSDKKeyboardKey::KK_KOR_6] = "KK_KOR_6";
+	_mKeyboardCharMap[EChromaSDKKeyboardKey::KK_KOR_7] = "KK_KOR_7";
 	_mKeyboardCharMap[EChromaSDKKeyboardKey::KK_LOGO] = "Razer logo";
 	_mKeyboardCharMap[EChromaSDKKeyboardKey::KK_INVALID] = "Invalid keys.";
 
@@ -369,6 +369,8 @@ int ChromaSDKPlugin::GetMaxRow(const EChromaSDKDevice2DEnum& device)
 	{
 	case EChromaSDKDevice2DEnum::DE_Keyboard:
 		return Keyboard::MAX_ROW;
+	case EChromaSDKDevice2DEnum::DE_KeyboardExtended:
+		return Keyboard::v2::MAX_ROW;
 	case EChromaSDKDevice2DEnum::DE_Keypad:
 		return Keypad::MAX_ROW;
 	case EChromaSDKDevice2DEnum::DE_Mouse:
@@ -383,6 +385,8 @@ int ChromaSDKPlugin::GetMaxColumn(const EChromaSDKDevice2DEnum& device)
 	{
 	case EChromaSDKDevice2DEnum::DE_Keyboard:
 		return Keyboard::MAX_COLUMN;
+	case EChromaSDKDevice2DEnum::DE_KeyboardExtended:
+		return Keyboard::v2::MAX_COLUMN;
 	case EChromaSDKDevice2DEnum::DE_Keypad:
 		return Keypad::MAX_COLUMN;
 	case EChromaSDKDevice2DEnum::DE_Mouse:
@@ -609,6 +613,7 @@ FChromaSDKEffectResult ChromaSDKPlugin::CreateEffectNone2D(const EChromaSDKDevic
 	switch (device)
 	{
 	case EChromaSDKDevice2DEnum::DE_Keyboard:
+	case EChromaSDKDevice2DEnum::DE_KeyboardExtended:
 		result = RzChromaSDK::CreateKeyboardEffect(Keyboard::CHROMA_NONE, NULL, &effectId);
 		break;
 	case EChromaSDKDevice2DEnum::DE_Keypad:
@@ -680,6 +685,7 @@ FChromaSDKEffectResult ChromaSDKPlugin::CreateEffectStatic2D(const EChromaSDKDev
 	switch (device)
 	{
 	case EChromaSDKDevice2DEnum::DE_Keyboard:
+	case EChromaSDKDevice2DEnum::DE_KeyboardExtended:
 	{
 		Keyboard::STATIC_EFFECT_TYPE pParam = {};
 		pParam.Color = color;
@@ -784,7 +790,7 @@ FChromaSDKEffectResult ChromaSDKPlugin::CreateEffectCustom1D(const EChromaSDKDev
 	return data;
 }
 
-FChromaSDKEffectResult ChromaSDKPlugin::CreateEffectCustom2D(const EChromaSDKDevice2DEnum& device, const vector<FChromaSDKColors>& colors)
+FChromaSDKEffectResult ChromaSDKPlugin::CreateEffectCustom2D(const EChromaSDKDevice2DEnum& device, const vector<FChromaSDKColors>& colors, const vector<FChromaSDKColors>& keys)
 {
 	FChromaSDKEffectResult data = FChromaSDKEffectResult();
 
@@ -796,13 +802,13 @@ FChromaSDKEffectResult ChromaSDKPlugin::CreateEffectCustom2D(const EChromaSDKDev
 	{
 	case EChromaSDKDevice2DEnum::DE_Keyboard:
 	{
-		maxRow = Keyboard::MAX_ROW;
-		maxColumn = Keyboard::MAX_COLUMN;
+		maxRow = GetMaxRow(device);
+		maxColumn = GetMaxColumn(device);
 		if (maxRow != colors.size() ||
 			(colors.size() > 0 &&
 				maxColumn != colors[0].Colors.size()))
 		{
-			LogError("ChromaSDKPlugin::CreateEffectCustom2D Array size mismatch row: %d==%d column: %d==%d!\r\n",
+			LogError("ChromaSDKPlugin::CreateEffectCustom2D Colors Array size mismatch row: %d==%d column: %d==%d!\r\n",
 				maxRow,
 				colors.size(),
 				maxColumn,
@@ -819,6 +825,55 @@ FChromaSDKEffectResult ChromaSDKPlugin::CreateEffectCustom2D(const EChromaSDKDev
 			}
 		}
 		result = RzChromaSDK::CreateKeyboardEffect(Keyboard::CHROMA_CUSTOM, &pParam, &effectId);
+	}
+	break;
+	case EChromaSDKDevice2DEnum::DE_KeyboardExtended:
+	{
+		maxRow = GetMaxRow(device);
+		maxColumn = GetMaxColumn(device);
+		if (maxRow != colors.size() ||
+			(colors.size() > 0 &&
+				maxColumn != colors[0].Colors.size()))
+		{
+			LogError("ChromaSDKPlugin::CreateEffectCustom2D Colors Array size mismatch row: %d==%d column: %d==%d!\r\n",
+				maxRow,
+				colors.size(),
+				maxColumn,
+				colors.size() > 0 ? colors[0].Colors.size() : 0);
+			break;
+		}
+		Keyboard::v2::CUSTOM_EFFECT_TYPE pParam = {};
+		for (int i = 0; i < maxRow; i++)
+		{
+			const FChromaSDKColors& row = colors[i];
+			for (int j = 0; j < maxColumn; j++)
+			{
+				pParam.Color[i][j] = row.Colors[j];
+			}
+		}
+		// Keyboard and KeyboardExtended use 6x22
+		maxRow = GetMaxRow(EChromaSDKDevice2DEnum::DE_Keyboard);
+		maxColumn = GetMaxColumn(EChromaSDKDevice2DEnum::DE_Keyboard);
+		if (maxRow != keys.size() ||
+			(keys.size() > 0 &&
+				maxColumn != keys[0].Colors.size()))
+		{
+			LogError("ChromaSDKPlugin::CreateEffectCustom2D Keys Array size mismatch row: %d==%d column: %d==%d!\r\n",
+				maxRow,
+				keys.size(),
+				maxColumn,
+				keys.size() > 0 ? colors[0].Colors.size() : 0);
+			break;
+		}
+		for (int i = 0; i < maxRow; i++)
+		{
+			const FChromaSDKColors& row = keys[i];
+			for (int j = 0; j < maxColumn; j++)
+			{
+				pParam.Key[i][j] = row.Colors[j];
+			}
+		}
+		result = RzChromaSDK::CreateKeyboardEffect(Keyboard::CHROMA_CUSTOM2, &pParam, &effectId);
 	}
 	break;
 	case EChromaSDKDevice2DEnum::DE_Keypad:
@@ -885,20 +940,20 @@ FChromaSDKEffectResult ChromaSDKPlugin::CreateEffectCustom2D(const EChromaSDKDev
 	return data;
 }
 
-FChromaSDKEffectResult ChromaSDKPlugin::CreateEffectKeyboardCustom2D(const vector<FChromaSDKColors>& colors)
+FChromaSDKEffectResult ChromaSDKPlugin::CreateEffectKeyboardCustom2D(const vector<FChromaSDKColors>& colors, const vector<FChromaSDKColors>& keys)
 {
 	FChromaSDKEffectResult data = FChromaSDKEffectResult();
 
 	RZRESULT result = 0;
 	RZEFFECTID effectId = RZEFFECTID();
-	int maxRow = Keyboard::MAX_ROW;
-	int maxColumn = Keyboard::MAX_COLUMN;
+	int maxRow = GetMaxRow(EChromaSDKDevice2DEnum::DE_Keyboard);
+	int maxColumn = GetMaxColumn(EChromaSDKDevice2DEnum::DE_Keyboard);
 
 	if (maxRow != colors.size() ||
 		(colors.size() > 0 &&
 		maxColumn != colors[0].Colors.size()))
 	{
-		LogError("ChromaSDKPlugin::CreateEffectCustom2D Array size mismatch row: %d==%d column: %d==%d!\r\n",
+		LogError("ChromaSDKPlugin::CreateEffectKeyboardCustom2D Colors Array size mismatch row: %d==%d column: %d==%d!\r\n",
 			maxRow,
 			colors.size(),
 			maxColumn,
@@ -907,17 +962,110 @@ FChromaSDKEffectResult ChromaSDKPlugin::CreateEffectKeyboardCustom2D(const vecto
 	else
 	{
 		Keyboard::CUSTOM_KEY_EFFECT_TYPE pParam = {};
+
 		for (int i = 0; i < maxRow; i++)
 		{
 			const FChromaSDKColors& row = colors[i];
 			for (int j = 0; j < maxColumn; j++)
 			{
-				pParam.Key[i][j] = row.Colors[j];
+				pParam.Color[i][j] = row.Colors[j];
 			}
 		}
+
+
+		if (maxRow != keys.size() ||
+			(keys.size() > 0 &&
+				maxColumn != colors[0].Colors.size()))
+		{
+			LogError("ChromaSDKPlugin::CreateEffectKeyboardCustom2D Keys Array size mismatch row: %d==%d column: %d==%d!\r\n",
+				maxRow,
+				keys.size(),
+				maxColumn,
+				keys.size() > 0 ? keys[0].Colors.size() : 0);
+		}
+		else
+		{
+			for (int i = 0; i < maxRow; i++)
+			{
+				const FChromaSDKColors& row = keys[i];
+				for (int j = 0; j < maxColumn; j++)
+				{
+					pParam.Key[i][j] = row.Colors[j];
+				}
+			}
+		}
+
 		result = RzChromaSDK::CreateKeyboardEffect(Keyboard::CHROMA_CUSTOM_KEY, &pParam, &effectId);
 	}	
 	
+	data.EffectId.Data = effectId;
+	data.Result = result;
+
+	return data;
+}
+
+FChromaSDKEffectResult ChromaSDKPlugin::CreateEffectKeyboardExtendedCustom2D(const vector<FChromaSDKColors>& colors, const vector<FChromaSDKColors>& keys)
+{
+	FChromaSDKEffectResult data = FChromaSDKEffectResult();
+
+	RZRESULT result = 0;
+	RZEFFECTID effectId = RZEFFECTID();
+	int maxRow = GetMaxRow(EChromaSDKDevice2DEnum::DE_KeyboardExtended);
+	int maxColumn = GetMaxColumn(EChromaSDKDevice2DEnum::DE_KeyboardExtended);
+
+	if (maxRow != colors.size() ||
+		(colors.size() > 0 &&
+			maxColumn != colors[0].Colors.size()))
+	{
+		LogError("ChromaSDKPlugin::CreateEffectKeyboardExtendedCustom2D Colors Array size mismatch row: %d==%d column: %d==%d!\r\n",
+			maxRow,
+			colors.size(),
+			maxColumn,
+			colors.size() > 0 ? colors[0].Colors.size() : 0);
+	}
+	else
+	{
+		Keyboard::v2::CUSTOM_EFFECT_TYPE pParam = {};
+
+		for (int i = 0; i < maxRow; i++)
+		{
+			const FChromaSDKColors& row = colors[i];
+			for (int j = 0; j < maxColumn; j++)
+			{
+				pParam.Color[i][j] = row.Colors[j];
+			}
+		}
+
+		// Keyboard and KeyboardExtended use 6x22
+
+		maxRow = GetMaxRow(EChromaSDKDevice2DEnum::DE_Keyboard);
+		maxColumn = GetMaxColumn(EChromaSDKDevice2DEnum::DE_Keyboard);
+
+		if (maxRow != keys.size() ||
+			(keys.size() > 0 &&
+				maxColumn != keys[0].Colors.size()))
+		{
+			LogError("ChromaSDKPlugin::CreateEffectKeyboardExtendedCustom2D Keys Array size mismatch row: %d==%d column: %d==%d!\r\n",
+				maxRow,
+				keys.size(),
+				maxColumn,
+				keys.size() > 0 ? keys[0].Colors.size() : 0);
+		}
+		else
+		{
+			for (int i = 0; i < maxRow; i++)
+			{
+				const FChromaSDKColors& row = keys[i];
+				for (int j = 0; j < maxColumn; j++)
+				{
+					pParam.Key[i][j] = row.Colors[j];
+				}
+			}
+		}
+
+		result = RzChromaSDK::CreateKeyboardEffect(Keyboard::CHROMA_CUSTOM2, &pParam, &effectId);
+	}
+
 	data.EffectId.Data = effectId;
 	data.Result = result;
 
@@ -965,288 +1113,35 @@ AnimationBase* ChromaSDKPlugin::OpenAnimation(const string& path)
 	if (0 != fopen_s(&stream, path.c_str(), "rb") ||
 		stream == nullptr)
 	{
-		//LogError("OpenAnimation: Failed to open animation! %s\r\n", path.c_str());
+		LogError("OpenAnimation: Failed to open animation! %s\r\n", path.c_str());
 	}
 	else
 	{
-		long read = 0;
-		long expectedRead = 1;
-		long expectedSize = sizeof(byte);
-
-		//version
-		int version = 0;
-		expectedSize = sizeof(int);
-		read = fread(&version, expectedSize, 1, stream);
-		if (read != expectedRead)
+		fseek(stream, 0, SEEK_END);
+		const int size = ftell(stream);
+		if (size <= 0)
 		{
-			LogError("OpenAnimation: Failed to read version!\r\n");
-			std::fclose(stream);
-			return nullptr;
-		}
-		if (version != ANIMATION_VERSION)
-		{
-			LogError("OpenAnimation: Unexpected Version!\r\n");
-			std::fclose(stream);
-			return nullptr;
-		}
-
-		//LogDebug("OpenAnimation: Version: %d\r\n", version);
-
-		//device
-		byte device = 0;
-
-		// device type
-		byte deviceType = 0;
-		expectedSize = sizeof(byte);
-		read = fread(&deviceType, expectedSize, 1, stream);
-		if (read != expectedRead)
-		{
-			LogError("OpenAnimation: Unexpected DeviceType!\r\n");
-			std::fclose(stream);
-			return nullptr;
+			LogError("OpenAnimation: Failed to open empty animation! %s\r\n", path.c_str());
 		}
 		else
 		{
-			//device
-			switch ((EChromaSDKDeviceTypeEnum)deviceType)
-			{
-			case EChromaSDKDeviceTypeEnum::DE_1D:
-				//LogDebug("OpenAnimation: DeviceType: 1D\r\n");
-				break;
-			case EChromaSDKDeviceTypeEnum::DE_2D:
-				//LogDebug("OpenAnimation: DeviceType: 2D\r\n");
-				break;
-			default:
-				LogError("OpenAnimation: Unexpected DeviceType!\r\n");
-				std::fclose(stream);
-				return nullptr;
-			}
-
-			switch (deviceType)
-			{
-			case EChromaSDKDeviceTypeEnum::DE_1D:
-				read = fread(&device, expectedSize, 1, stream);
-				if (read != expectedRead)
-				{
-					LogError("OpenAnimation: Unexpected Device!\r\n");
-					std::fclose(stream);
-					return nullptr;
-				}
-				else
-				{
-					switch ((EChromaSDKDevice1DEnum)device)
-					{
-					case EChromaSDKDevice1DEnum::DE_ChromaLink:
-						//LogDebug("OpenAnimation: Device: DE_ChromaLink\r\n");
-						break;
-					case EChromaSDKDevice1DEnum::DE_Headset:
-						//LogDebug("OpenAnimation: Device: DE_Headset\r\n");
-						break;
-					case EChromaSDKDevice1DEnum::DE_Mousepad:
-						//LogDebug("OpenAnimation: Device: DE_Mousepad\r\n");
-						break;
-					}
-
-					Animation1D* animation1D = new Animation1D();
-					animation = animation1D;
-
-					// device
-					animation1D->SetDevice((EChromaSDKDevice1DEnum)device);
-
-					//frame count
-					int frameCount;
-
-					expectedSize = sizeof(int);
-					read = fread(&frameCount, expectedSize, 1, stream);
-					if (read != expectedRead)
-					{
-						LogError("OpenAnimation: Error detected reading frame count!\r\n");
-						delete animation1D;
-						std::fclose(stream);
-						return nullptr;
-					}
-					else
-					{
-						vector<FChromaSDKColorFrame1D>& frames = animation1D->GetFrames();
-						for (int index = 0; index < frameCount; ++index)
-						{
-							FChromaSDKColorFrame1D frame = FChromaSDKColorFrame1D();
-							int maxLeds = GetMaxLeds((EChromaSDKDevice1DEnum)device);
-
-							//duration
-							float duration = 0.0f;
-							expectedSize = sizeof(float);
-							read = fread(&duration, expectedSize, 1, stream);
-							if (read != expectedRead)
-							{
-								LogError("OpenAnimation: Error detected reading duration!\r\n");
-								delete animation1D;
-								std::fclose(stream);
-								return nullptr;
-							}
-							else
-							{
-								if (duration >= 0.033f)
-								{
-									frame.Duration = duration;
-								}
-								else
-								{
-									frame.Duration = 0.033f;
-								}
-
-								// colors
-								expectedSize = sizeof(int);
-								for (int i = 0; i < maxLeds; ++i)
-								{
-									int color = 0;
-									read = fread(&color, expectedSize, 1, stream);
-									if (read != expectedRead)
-									{
-										LogError("OpenAnimation: Error detected reading color!\r\n");
-										delete animation1D;
-										std::fclose(stream);
-										return nullptr;
-									}
-									else
-									{
-										frame.Colors.push_back((COLORREF)color);
-									}
-								}
-								if (index == 0)
-								{
-									frames[0] = frame;
-								}
-								else
-								{
-									frames.push_back(frame);
-								}
-							}
-						}
-					}
-				}
-				break;
-			case EChromaSDKDeviceTypeEnum::DE_2D:
-				read = fread(&device, expectedSize, 1, stream);
-				if (read != expectedRead)
-				{
-					LogError("OpenAnimation: Unexpected Device!\r\n");
-					std::fclose(stream);
-					return nullptr;
-				}
-				else
-				{
-					switch ((EChromaSDKDevice2DEnum)device)
-					{
-					case EChromaSDKDevice2DEnum::DE_Keyboard:
-						//LogDebug("OpenAnimation: Device: DE_Keyboard\r\n");
-						break;
-					case EChromaSDKDevice2DEnum::DE_Keypad:
-						//LogDebug("OpenAnimation: Device: DE_Keypad\r\n");
-						break;
-					case EChromaSDKDevice2DEnum::DE_Mouse:
-						//LogDebug("OpenAnimation: Device: DE_Mouse\r\n");
-						break;
-					}
-
-					Animation2D* animation2D = new Animation2D();
-					animation = animation2D;
-
-					//device
-					animation2D->SetDevice((EChromaSDKDevice2DEnum)device);
-
-					//frame count
-					int frameCount;
-
-					expectedSize = sizeof(int);
-					read = fread(&frameCount, expectedSize, 1, stream);
-					if (read != expectedRead)
-					{
-						LogError("OpenAnimation: Error detected reading frame count!\r\n");
-						delete animation2D;
-						std::fclose(stream);
-						return nullptr;
-					}
-					else
-					{
-						vector<FChromaSDKColorFrame2D>& frames = animation2D->GetFrames();
-						for (int index = 0; index < frameCount; ++index)
-						{
-							FChromaSDKColorFrame2D frame = FChromaSDKColorFrame2D();
-							int maxRow = GetMaxRow((EChromaSDKDevice2DEnum)device);
-							int maxColumn = GetMaxColumn((EChromaSDKDevice2DEnum)device);
-
-							//duration
-							float duration = 0.0f;
-							expectedSize = sizeof(float);
-							read = fread(&duration, expectedSize, 1, stream);
-							if (read != expectedRead)
-							{
-								LogError("OpenAnimation: Error detected reading duration!\r\n");
-								delete animation2D;
-								std::fclose(stream);
-								return nullptr;
-							}
-							else
-							{
-								if (duration >= 0.033f)
-								{
-									frame.Duration = duration;
-								}
-								else
-								{
-									frame.Duration = 0.033f;
-								}
-
-								// colors
-								expectedSize = sizeof(int);
-								for (int i = 0; i < maxRow; ++i)
-								{
-									FChromaSDKColors row = FChromaSDKColors();
-									for (int j = 0; j < maxColumn; ++j)
-									{
-										int color = 0;
-										read = fread(&color, expectedSize, 1, stream);
-										if (read != expectedRead)
-										{
-											LogError("OpenAnimation: Error detected reading color!\r\n");
-											delete animation2D;
-											std::fclose(stream);
-											return nullptr;
-										}
-										else
-										{
-											row.Colors.push_back((COLORREF)color);
-										}
-									}
-									frame.Colors.push_back(row);
-								}
-								if (index == 0)
-								{
-									frames[0] = frame;
-								}
-								else
-								{
-									frames.push_back(frame);
-								}
-							}
-						}
-					}
-				}
-				break;
-			}
+			BYTE* data = new BYTE[size];
+			fseek(stream, 0, SEEK_SET);
+			fread(data, size, 1, stream);
+			animation = OpenAnimationFromMemory(data);
+			delete[] data;
+			std::fclose(stream);
 		}
 
-		std::fclose(stream);
 		//LogDebug("OpenAnimation: Loaded %s\r\n", path.c_str());
 	}
 
 	return animation;
 }
 
-AnimationBase* ChromaSDKPlugin::OpenAnimationFromMemory(const byte* data)
+AnimationBase* ChromaSDKPlugin::OpenAnimationFromMemory(const BYTE* data)
 {
-	const byte* pointer = data;
+	const BYTE* pointer = data;
 	AnimationBase* animation = nullptr;
 
 	if (0 == data)
@@ -1257,7 +1152,7 @@ AnimationBase* ChromaSDKPlugin::OpenAnimationFromMemory(const byte* data)
 
 	long read = 0;
 	long expectedRead = 1;
-	long expectedSize = sizeof(byte);
+	long expectedSize = sizeof(BYTE);
 
 	//version
 	int version = 0;
@@ -1273,11 +1168,11 @@ AnimationBase* ChromaSDKPlugin::OpenAnimationFromMemory(const byte* data)
 	//LogDebug("OpenAnimationFromMemory: Version: %d\r\n", version);
 
 	//device
-	byte device = 0;
+	BYTE device = 0;
 
 	// device type
-	byte deviceType = 0;
-	expectedSize = sizeof(byte);
+	BYTE deviceType = 0;
+	expectedSize = sizeof(BYTE);
 	memcpy(&deviceType, pointer, expectedSize);
 	pointer += expectedSize;
 
@@ -1299,7 +1194,7 @@ AnimationBase* ChromaSDKPlugin::OpenAnimationFromMemory(const byte* data)
 	{
 	case EChromaSDKDeviceTypeEnum::DE_1D:
 	{
-		expectedSize = sizeof(byte);
+		expectedSize = sizeof(BYTE);
 		memcpy(&device, pointer, expectedSize);
 		pointer += expectedSize;
 
@@ -1373,7 +1268,7 @@ AnimationBase* ChromaSDKPlugin::OpenAnimationFromMemory(const byte* data)
 	break;
 	case EChromaSDKDeviceTypeEnum::DE_2D:
 	{
-		expectedSize = sizeof(byte);
+		expectedSize = sizeof(BYTE);
 		memcpy(&device, pointer, expectedSize);
 		pointer += expectedSize;
 
@@ -1381,6 +1276,9 @@ AnimationBase* ChromaSDKPlugin::OpenAnimationFromMemory(const byte* data)
 		{
 		case EChromaSDKDevice2DEnum::DE_Keyboard:
 			//LogDebug("OpenAnimation: Device: DE_Keyboard\r\n");
+			break;
+		case EChromaSDKDevice2DEnum::DE_KeyboardExtended:
+			//LogDebug("OpenAnimation: Device: DE_KeyboardExtended\r\n");
 			break;
 		case EChromaSDKDevice2DEnum::DE_Keypad:
 			//LogDebug("OpenAnimation: Device: DE_Keypad\r\n");
@@ -1406,7 +1304,7 @@ AnimationBase* ChromaSDKPlugin::OpenAnimationFromMemory(const byte* data)
 		vector<FChromaSDKColorFrame2D>& frames = animation2D->GetFrames();
 		for (int index = 0; index < frameCount; ++index)
 		{
-			FChromaSDKColorFrame2D frame = FChromaSDKColorFrame2D();
+			FChromaSDKColorFrame2D frame = FChromaSDKColorFrame2D((EChromaSDKDevice2DEnum)device);
 			int maxRow = GetMaxRow((EChromaSDKDevice2DEnum)device);
 			int maxColumn = GetMaxColumn((EChromaSDKDevice2DEnum)device);
 

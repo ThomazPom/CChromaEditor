@@ -21,7 +21,11 @@
   }
 </style>
 </head>
-<body><div id="readme" class="container"><article class="markdown-body entry-content"><h1 id="cchromaeditor-c-native-mfc-library-for-playing-and-editing-chroma-animations">CChromaEditor - C++ Native MFC Library for playing and editing Chroma animations</h1>
+<body><div id="readme" class="container"><article class="markdown-body entry-content"><h1 id="latest">Latest</h1>
+<ul>
+<li>Note: Visit the <a href="https://chroma.razer.com/ChromaGuide/">Chroma Animation Guide</a> to find the latest supported plugin for Chroma RGB.</li>
+</ul>
+<h1 id="cchromaeditor-c-dynamic-library-for-playing-and-editing-chroma-animations">CChromaEditor - C++ Dynamic Library for playing and editing Chroma animations</h1>
 <p><strong>Table of Contents</strong></p>
 <ul>
 <li><a href="#see-also">See Also</a></li>
@@ -29,7 +33,9 @@
 <li><a href="#prerequisites">Prerequisites</a></li>
 <li><a href="#security">Security</a></li>
 <li><a href="#assets">Assets</a></li>
-<li><a href="dialog">Dialog</a></li>
+<li><a href="#dialog">Dialog</a></li>
+<li><a href="#streaming">Streaming</a></li>
+<li><a href="#streaming-logic-flow">Streaming Logic Flow</a></li>
 <li><a href="#api">API</a></li>
 <li><a href="#file-format">File Format</a></li>
 </ul>
@@ -39,29 +45,9 @@
 <ul>
 <li><a href="http://chroma.razer.com/ChromaGuide/">Chroma Animation Guide</a> - Visual examples of the Chroma Animation API methods</li>
 </ul>
-<p><strong>Apps:</strong></p>
-<ul>
-<li><p><a href="https://github.com/razerofficial/CSDK_SampleApp">CSDK_SampleApp</a> - Chroma C++ Sample App</p>
-</li>
-<li><p><a href="https://github.com/tgraupmann/ChromaDiscordApp">ChromaClientForDiscord</a> - Add Chroma lighting to the Discord App events</p>
-</li>
-<li><p><a href="https://github.com/tgraupmann/ChromaClientForMixer">ChromaClientForMixer</a> - Add Chroma lighting to the Mixer streaming experience</p>
-</li>
-<li><p><a href="https://github.com/tgraupmann/ChromaTwitchExtension">ChromaClientForTwitch</a> - Add Chroma lighting to the Twitch streaming experience</p>
-</li>
-</ul>
 <p><strong>Plugins:</strong></p>
 <ul>
-<li><p><a href="https://github.com/RazerOfficial/CChromaEditor">CChromaEditor</a> - C++ native MFC library for playing and editing Chroma animations</p>
-</li>
-<li><p><a href="https://github.com/RazerOfficial/GameMakerChromaExtension">GameMakerChromaExtension</a> - GameMaker extension to control lighting for Razer Chroma</p>
-</li>
-<li><p><a href="https://github.com/RazerOfficial/HTML5ChromaSDK">HTML5ChromaSDK</a> - JavaScript library for playing Chroma animations</p>
-</li>
-<li><p><a href="https://github.com/RazerOfficial/UE4ChromaSDKRT">UE4ChromaSDKRT</a> - UE4 runtime module with Blueprint library for the ChromaSDK</p>
-</li>
-<li><p><a href="https://github.com/RazerOfficial/UnityNativeChromaSDK">UnityNativeChromaSDK</a> - Unity native library for the ChromaSDK</p>
-</li>
+<li><a href="https://github.com/RazerOfficial/CChromaEditor">CChromaEditor</a> - C++ native MFC library for playing and editing Chroma animations</li>
 </ul>
 <p><a name="frameworks-supported"></a></p>
 <h2 id="frameworks-supported">Frameworks supported</h2>
@@ -74,11 +60,16 @@
 <p><a name="prerequisites"></a></p>
 <h2 id="prerequisites">Prerequisites</h2>
 <ul>
-<li><p>Install <a href="http://developer.razerzone.com/works-with-chroma/download/">Synapse</a></p>
+<li><p>Install <a href="https://www.razer.com/synapse-3">Synapse</a></p>
 </li>
-<li><p>Synapse will install the Chroma SDK when a Chroma enabled device is connected</p>
+<li><p>Make sure the Chroma Connect module is installed.</p>
 </li>
-<li><p>Install <a href="https://www.visualstudio.com/downloads/">Microsoft Visual C++ Redistributable for Visual Studio 2017</a></p>
+</ul>
+<p><img src="images/image_5.png" alt="image_5"></p>
+<ul>
+<li><p>If you don't have Chroma hardware, you can see Chroma effects with the <a href="https://github.com/razerofficial/ChromaEmulator">Chroma Emulator</a></p>
+</li>
+<li><p>This library is full source and can build with VS 2015/2017/2019 so make sure you include the corresponding <a href="https://www.visualstudio.com/downloads/">Microsoft Visual C++ Redistributable for Visual Studio</a> with your application for the versions that you build with. The core ChromaSDK is built with VS 2015, so you'll want that redistributable at a minimum.</p>
 </li>
 <li><p>To compile: Install <a href="https://www.visualstudio.com/">Visual Studio</a></p>
 </li>
@@ -88,6 +79,9 @@
 </li>
 </ul>
 <p><img src="images/image_2.png" alt="image_42"></p>
+<ul>
+<li>Use retarget solution to select an available Windows SDK.</li>
+</ul>
 <hr>
 <p><a name="security"></a></p>
 <h2 id="security">Security</h2>
@@ -95,49 +89,49 @@
 <pre><code>// load the library if previously not loaded
 if (_sLibraryChroma == NULL)
 {
-    // load the library
-    _sLibraryChroma = LoadLibrary(CHROMASDKDLL);
-    if (_sLibraryChroma == NULL)
-    {
-        return false;
-    }
-    return true;
+ // load the library
+ _sLibraryChroma = LoadLibrary(CHROMASDKDLL);
+ if (_sLibraryChroma == NULL)
+ {
+  return false;
+ }
+ return true;
 }</code></pre><hr>
 <p>To avoid a 3rd party injecting malicious code, the C++ Chroma Editor Library checks for a valid signature on the Razer Chroma DLL. The DLL issuer is also validated to be <code>Razer USA Ltd.</code> before the API methods can be invoked.</p>
 <pre><code>// load the library if previously not loaded
 if (_sLibraryChroma == NULL)
 {
-    // load the library
-    _sLibraryChroma = LoadLibrary(CHROMASDKDLL);
-    if (_sLibraryChroma == NULL)
-    {
-        return false;
-    }
+ // load the library
+ _sLibraryChroma = LoadLibrary(CHROMASDKDLL);
+ if (_sLibraryChroma == NULL)
+ {
+  return false;
+ }
 
-    // verify the library has a valid signature
-    _sInvalidSignature = !ChromaSDK::VerifyLibrarySignature::VerifyModule(_sLibraryChroma);
-    if (_sInvalidSignature)
-    {
-        fprintf(stderr, &quot;Failed to load Chroma library with invalid signature!\r\n&quot;);
+ // verify the library has a valid signature
+ _sInvalidSignature = !ChromaSDK::VerifyLibrarySignature::VerifyModule(_sLibraryChroma);
+ if (_sInvalidSignature)
+ {
+  fprintf(stderr, "Failed to load Chroma library with invalid signature!\r\n");
 
-        // unload the library
-        FreeLibrary(_sLibraryChroma);
-        _sLibraryChroma = NULL;
+  // unload the library
+  FreeLibrary(_sLibraryChroma);
+  _sLibraryChroma = NULL;
 
-        return false;
-    }
+  return false;
+ }
 }</code></pre><hr>
 <p>The <code>ChromaAnimationAPI::Init()</code> method returns <code>RZRESULT_SUCCESS</code> when initialization has succeeded. Avoid making calls to the Chroma API when anything other than success is returned. A unsuccessful result indicates <code>Chroma</code> is not present on the machine.</p>
 <pre><code>RZRESULT result = ChromaAnimationAPI::Init();
 if (result != RZSUCCESS)
 {
-    // avoid making API calls
-    return;
+ // avoid making API calls
+ return;
 }</code></pre><hr>
 <p><a name="getting-started"></a></p>
 <h2 id="getting-started">Getting Started</h2>
 <p><strong>Running the editor application</strong></p>
-<p>1 Run the <a href="https://github.com/razerofficial/CChromaEditor/releases/tag/1.0">Chroma Editor Installer</a> to associate <code>.chroma</code> animations with the editor.</p>
+<p>1 Run the <a href="https://github.com/razerofficial/CChromaEditor/releases/">Chroma Editor Installer</a> to associate <code>.chroma</code> animations with the editor.</p>
 <p>2 Double-click a <code>.chroma</code> animation file to open in the editor</p>
 <p><strong>Building the editor</strong></p>
 <p>1 Open <code>CChromaEditor.sln</code> in Visual Studio</p>
@@ -145,9 +139,10 @@ if (result != RZSUCCESS)
 <p>3 The <code>CConsoleEditor</code> project is a console project that uses the <code>DLL</code> and provides a command-line interface. The only parameter is the file path to a <code>Chroma</code> animation file. When no parameter is provided, the editor opens <code>temp.chroma</code> on the desktop.</p>
 <p><a name="assets"></a></p>
 <h2 id="assets">Assets</h2>
-<p>This library supports the <code>Chroma</code> animation exports from <a href="https://github.com/razerofficial/UE4ChromaSDK">UE4</a>, <a href="https://github.com/razerofficial/UnityNativeChromaSDK/">Unity</a>, and <a href="https://github.com/razerofficial/GameMakerChromaExtension">GameMaker</a>.</p>
+<p>The <code>chroma</code> binary file format is supported in multiple engines and can even play on websites. Authoring tools like the <a href="https://chroma.razer.com/ChromaEditor">Web Chroma Editor</a> can easily record animations for the full device set which can be downloaded in a zip file. The <code>Web Chroma Editor</code> is also able to embed <code>chroma</code> animation files into code for specific languages.</p>
 <p><a name="dialog"></a></p>
 <h2 id="dialog">Dialog</h2>
+<p>The standalone Chroma editor has a MFC dialog that can be used to create Chroma animations for the set of devices.</p>
 <p><img src="images/image_1.png" alt="image_1"></p>
 <p><strong>File Menu</strong></p>
 <p><img src="images/image_3.png" alt="image_3"></p>
@@ -163,9 +158,86 @@ if (result != RZSUCCESS)
 <p><img src="images/image_4.png" alt="image_4"></p>
 <p><strong>Import Image</strong></p>
 <p>Import a BMP, JPG, or PNG texture into the grid layout. The images will be stretched to fit the grid.</p>
+<p><strong>Import Image Sequence</strong></p>
+<p>Import a numbered set of images as an animation.</p>
 <p><strong>Import Animation</strong></p>
 <p>Import a GIF animation into the grid layout. Multiple frames will be added if they exist in the GIF. The image will be stretched to fit the grid.
 <br></p>
+<p><a name="streaming"></a></p>
+<h2 id="streaming">Streaming</h2>
+<p>The <a href="https://stream.razer.com/">Razer Streaming Portal</a> supports streaming Chroma RGB on video streaming platforms and can be embedded on any 3rd party site. In order to stream Chroma RGB, you'll need the latest Synapse and Chroma Connect module. No other software is required to control streaming from the browser or the API below.</p>
+<p><strong>Login</strong></p>
+<p>The first step is to login into the <a href="https://stream.razer.com/">Razer Streaming Portal</a> with Razer ID.</p>
+<p><img src="images/image_6.png" alt="image_6"></p>
+<p><strong>Profile</strong></p>
+<p>Navigate to the user profile by clicking <code>MY STREAMS</code>.</p>
+<p><img src="images/image_7.png" alt="image_7"></p>
+<p><strong>Stream Source</strong></p>
+<p>Create a <code>Stream Source</code> to broadcast <code>Chroma RGB</code> events.</p>
+<p><img src="images/image_8.png" alt="image_8"></p>
+<p><strong>Name Your Stream Source</strong></p>
+<p>Enter the name of your stream source and enter name of the game to generate the stream thumbnail. Make sure <code>GO LIVE</code> is turned on. The <code>Mature</code> toggle is optional and can be filtered.</p>
+<p><img src="images/image_9.png" alt="image_9"></p>
+<p><strong>Source</strong></p>
+<p>PC games set the source to <code>PC</code>. <code>Cloud Gaming</code>, <code>Console</code>, and <code>Mobile</code> games set the <code>Source</code> to <code>Other</code>.</p>
+<p><img src="images/image_10.png" alt="image_10"></p>
+<p><strong>Authorize</strong></p>
+<p>Authorizing a shortcode is used to allow the broadcast to be toggled on sites outside the <code>Razer Streaming Portal</code> or by games using the <a href="#api">API</a> to authorize a <code>ShortCode</code>. Once the <code>Shortcode</code> is authorized, the <code>Stream Id</code> and <code>Stream Key</code> can be obtained before releasing the <code>ShortCode</code>.</p>
+<p><img src="images/image_11.png" alt="image_11"></p>
+<p><strong>Link Stream Source</strong></p>
+<p>The <code>Stream Source</code> can be linked to several social platforms.  Enable the toggle for social platforms to appear on your <code>Stream Source</code> tile. Pick a <code>default</code> social platform for yuour <code>Stream Source</code> tile.</p>
+<p><img src="images/image_12.png" alt="image_12"></p>
+<p><strong>Embed</strong></p>
+<p><code>Chroma RGB</code> streaming can be an <code>Embed</code> on a 3rd party webpage. Click the <code>Embed</code> clipboard icon to add the HTML5 iframe snippet to the clipboard which can be pasted into a 3rd party webpage. The <code>Embed</code> URL must match the URL of the 3rd party webpage address.</p>
+<p><strong>Twitch</strong></p>
+<p>Add the <a href="https://dashboard.twitch.tv/extensions/5z0l5bgwb0r0xcqritj8leqgo06l9j">Razer Streaming Panel</a> Twitch Extension to stream Chroam RGB on Twitch. There's a easily link by clicking the Twitch gear icon.</p>
+<p><img src="images/image_18.png" alt="image_18"></p>
+<p><strong>Twitch Panel</strong></p>
+<p>In order to broadcast via the Twitch panel, use the <code>Authenticate</code> link to authorize the automatic shortcode.</p>
+<p><img src="images/image_20.png" alt="image_20"></p>
+<p>The shortcode will appear in the code activation popup and then click the <code>AUTHORIZE SHORTCODE</code> button. After the <code>Stream Source</code> has been authorized, the window can be closed.</p>
+<p><img src="images/image_21.png" alt="image_21"></p>
+<p>If the <code>Stream Source</code> is associated with the logged in <code>Razer ID</code>, authorization will give access to Twitch to allow the broadcast toggle to be used from the Twitch panel.</p>
+<p><img src="images/image_22.png" alt="image_22"></p>
+<p>Viewers of a live Twitch channel will automatically tune into the <code>Chroma RGB</code> from the broadcast. The streamer and viewers' hardware will be in sync.</p>
+<p><img src="images/image_23.png" alt="image_23"></p>
+<p><strong>Save</strong></p>
+<p>Save the <code>Stream Source</code> settings when finished. You can rename your <code>Stream Source</code> and save the changes. You can reuse the same <code>Stream Source</code> for multiple games by changing the game title / thumbnail. You can create multiple <code>Stream Sources</code> for mulitple games. You can always delete a <code>Stream Source</code> to keep things tidy. If you've accidentally streamed your <code>Stream Key</code> to viewers, you can always delete the <code>Stream Source</code> and create a new <code>Stream Source</code> to generate a new <code>Stream Id</code> and <code>Stream Key</code>.</p>
+<p><img src="images/image_13.png" alt="image_13"></p>
+<p><strong>Broadcast</strong></p>
+<p>Once a <code>Stream Source</code> has been created, the toggle can be used to <code>Broadcast</code> to the social platforms that have been linked. Browse the <a href="https://www.razer.com/chroma-workshop#--games">Chroma Workshop</a> to find games that have <code>Chroma RGB</code> integration. The broadcast toggle for <code>Chroma RGB</code> can be used before launching a game or after, either will work.</p>
+<p><img src="images/image_14.png" alt="image_14"></p>
+<p><strong>Streams</strong></p>
+<p>When the <code>Chroma RGB</code> broadcast is active and game <code>Chroma RGB</code> events are detected, the <code>Stream Source</code> tile will appear on the main page of the portal. The <code>Stream Source</code> can appear in the <code>Favorite Streamers</code> section if the associated streamer has been favorited. The <code>Stream Source</code> can appear in the <code>Favorite Games</code> section if the associated game has been favorited. The <code>Stream Source</code> appears in the <code>Available Stream</code> section sorted by view count and can be found through pagination.</p>
+<p><img src="images/image_15.png" alt="image_15"></p>
+<p><strong>Favorite Streamers</strong></p>
+<p>Clicking the streamer link on the <code>Stream Source</code> navigates to a page where favorites can be toggled via the star icon.</p>
+<p><img src="images/image_16.png" alt="image_16"></p>
+<p><strong>Favorite Games</strong></p>
+<p>Clicking the game link on the <code>Stream Source</code> navigates to a page where favorites can be toggled via the heart icon.</p>
+<p><img src="images/image_17.png" alt="image_17"></p>
+<p><strong>Watch</strong></p>
+<p>Clicking a <code>Stream Source</code> tile opens the watch page. The watch page streams <code>Chroma RGB</code> including audio and video with live chat (if available) when linked to the <code>Stream Source</code>. <code>Chroma</code> is initialized when the page receives focus, and uninitializes <code>Chroma</code> when the page loses focus. The watch page also has a drop down to switch between social channels that are linked with the stream.</p>
+<p><img src="images/image_19.png" alt="image_19"></p>
+<p><a name="streaming-logic-flow"></a></p>
+<h2 id="streaming-logic-flow">Streaming Logic Flow</h2>
+<p>By default, any game that implements <code>Chroma RGB</code> on PC is compatible with streaming that can be controlled from the <a href="https://stream.razer.com/">Razer Streaming Portal</a>. Games are also able to control streaming via the API. Using the streaming API is most useful when the instance of the game is running within <code>Cloud Gaming</code>. Streaming can either broadcast or watch a <code>Chroma RGB</code> stream. The API supports broadcasting or watching but not both at the same time. It's recommended that games have a <code>Chroma RGB</code> toggle in the game settings that is on by default. For streaming <code>Chroma RGB</code>, games should be able to display a <code>shortcode</code> for stream authorization and a <code>broadcast toggle</code>.</p>
+<p>Step 1. At any time, the game can use <code>StreamGetStatus</code> to get the streaming current status to display to the user.</p>
+<p>Step 2. To prepare for broadcasting, the streamer creates a <code>Stream Source</code> on the <a href="https://stream.razer.com/profile">profile page</a>.</p>
+<p>Step 3. The game invokes <code>StreamGetAuthShortcode</code> to display a six digit alpha-numeric <code>shortcode</code> to the streamer. The <code>shortcode</code> will expire within 5 minutes.</p>
+<p>On PC, the only streaming platform is <code>"PC"</code>.</p>
+<p>Cloud gaming platforms are specified below.</p>
+<pre><code>"GEFORCE_NOW"
+"LUNA"
+"STADIA"
+"GAME_PASS"</code></pre><p>Step 4. The game invokes <code>StreamGetId</code> and <code>StreamGetKey</code> on a 3-second interval while waiting on user authorization.</p>
+<p>Step 5. The streamer can edit any <code>Stream Source</code> on the <a href="https://stream.razer.com/profile">profile page</a> and click <code>AUTHORIZE SHORT CODE</code>.</p>
+<p><img src="images/image_11.png" alt="image_11"></p>
+<p>Step 6. The streamer enters the shortcode and clicks <code>AUTHORIZE SHORT CODE</code>.</p>
+<p><img src="images/image_21.png" alt="image_21"></p>
+<p>Step 7. At this point <code>StreamGetId</code> and <code>StreamGetKey</code> return valid data to the game. The <code>Stream Id</code> and <code>Stream Key</code> should be saved in the user settings for feature streaming. To complete the authorization, invoke <code>StreamReleaseShortcode</code> which will prevent any other users from obtaining the auth details corresponding to the shortcode.</p>
+<p>Step 8. The game can now invoke <code>StreamBroadcast</code> to begin broadcasting <code>Chroma RGB</code>. Both the <code>Stream Id</code> and <code>Stream Key</code> are needed to broadcast. <code>StreamBroadcastEnd</code> will end the broadcast.</p>
+<p>Step 9. The game can invoke <code>StreamWatch</code> to watch the <code>Chroma RGB</code> stream for a given <code>Stream Id</code>. Watching a stream will end by invoking <code>StreamWatchEnd</code>.</p>
 <p><a name="api"></a></p>
 <h2 id="api">API</h2>
 <ul>
@@ -175,13 +247,16 @@ if (result != RZSUCCESS)
 <p><em>(Start of automation)</em></p>
 <p>Methods:</p>
 <ul>
+<li><a href="#PluginAddColor">PluginAddColor</a></li>
 <li><a href="#PluginAddFrame">PluginAddFrame</a></li>
+<li><a href="#PluginAddNonZeroAllKeys">PluginAddNonZeroAllKeys</a></li>
 <li><a href="#PluginAddNonZeroAllKeysAllFrames">PluginAddNonZeroAllKeysAllFrames</a></li>
 <li><a href="#PluginAddNonZeroAllKeysAllFramesName">PluginAddNonZeroAllKeysAllFramesName</a></li>
 <li><a href="#PluginAddNonZeroAllKeysAllFramesNameD">PluginAddNonZeroAllKeysAllFramesNameD</a></li>
 <li><a href="#PluginAddNonZeroAllKeysAllFramesOffset">PluginAddNonZeroAllKeysAllFramesOffset</a></li>
 <li><a href="#PluginAddNonZeroAllKeysAllFramesOffsetName">PluginAddNonZeroAllKeysAllFramesOffsetName</a></li>
 <li><a href="#PluginAddNonZeroAllKeysAllFramesOffsetNameD">PluginAddNonZeroAllKeysAllFramesOffsetNameD</a></li>
+<li><a href="#PluginAddNonZeroAllKeysName">PluginAddNonZeroAllKeysName</a></li>
 <li><a href="#PluginAddNonZeroAllKeysOffset">PluginAddNonZeroAllKeysOffset</a></li>
 <li><a href="#PluginAddNonZeroAllKeysOffsetName">PluginAddNonZeroAllKeysOffsetName</a></li>
 <li><a href="#PluginAddNonZeroAllKeysOffsetNameD">PluginAddNonZeroAllKeysOffsetNameD</a></li>
@@ -206,6 +281,8 @@ if (result != RZSUCCESS)
 <li><a href="#PluginCloseAnimationNameD">PluginCloseAnimationNameD</a></li>
 <li><a href="#PluginCloseComposite">PluginCloseComposite</a></li>
 <li><a href="#PluginCloseCompositeD">PluginCloseCompositeD</a></li>
+<li><a href="#PluginCopyAllKeys">PluginCopyAllKeys</a></li>
+<li><a href="#PluginCopyAllKeysName">PluginCopyAllKeysName</a></li>
 <li><a href="#PluginCopyAnimation">PluginCopyAnimation</a></li>
 <li><a href="#PluginCopyAnimationName">PluginCopyAnimationName</a></li>
 <li><a href="#PluginCopyAnimationNameD">PluginCopyAnimationNameD</a></li>
@@ -224,6 +301,12 @@ if (result != RZSUCCESS)
 <li><a href="#PluginCopyKeyColorAllFramesOffsetNameD">PluginCopyKeyColorAllFramesOffsetNameD</a></li>
 <li><a href="#PluginCopyKeyColorName">PluginCopyKeyColorName</a></li>
 <li><a href="#PluginCopyKeyColorNameD">PluginCopyKeyColorNameD</a></li>
+<li><a href="#PluginCopyKeysColor">PluginCopyKeysColor</a></li>
+<li><a href="#PluginCopyKeysColorAllFrames">PluginCopyKeysColorAllFrames</a></li>
+<li><a href="#PluginCopyKeysColorAllFramesName">PluginCopyKeysColorAllFramesName</a></li>
+<li><a href="#PluginCopyKeysColorName">PluginCopyKeysColorName</a></li>
+<li><a href="#PluginCopyKeysColorOffset">PluginCopyKeysColorOffset</a></li>
+<li><a href="#PluginCopyKeysColorOffsetName">PluginCopyKeysColorOffsetName</a></li>
 <li><a href="#PluginCopyNonZeroAllKeys">PluginCopyNonZeroAllKeys</a></li>
 <li><a href="#PluginCopyNonZeroAllKeysAllFrames">PluginCopyNonZeroAllKeysAllFrames</a></li>
 <li><a href="#PluginCopyNonZeroAllKeysAllFramesName">PluginCopyNonZeroAllKeysAllFramesName</a></li>
@@ -251,21 +334,30 @@ if (result != RZSUCCESS)
 <li><a href="#PluginCopyNonZeroTargetAllKeysOffset">PluginCopyNonZeroTargetAllKeysOffset</a></li>
 <li><a href="#PluginCopyNonZeroTargetAllKeysOffsetName">PluginCopyNonZeroTargetAllKeysOffsetName</a></li>
 <li><a href="#PluginCopyNonZeroTargetAllKeysOffsetNameD">PluginCopyNonZeroTargetAllKeysOffsetNameD</a></li>
+<li><a href="#PluginCopyNonZeroTargetZeroAllKeysAllFrames">PluginCopyNonZeroTargetZeroAllKeysAllFrames</a></li>
+<li><a href="#PluginCopyNonZeroTargetZeroAllKeysAllFramesName">PluginCopyNonZeroTargetZeroAllKeysAllFramesName</a></li>
+<li><a href="#PluginCopyNonZeroTargetZeroAllKeysAllFramesNameD">PluginCopyNonZeroTargetZeroAllKeysAllFramesNameD</a></li>
 <li><a href="#PluginCopyRedChannelAllFrames">PluginCopyRedChannelAllFrames</a></li>
 <li><a href="#PluginCopyRedChannelAllFramesName">PluginCopyRedChannelAllFramesName</a></li>
 <li><a href="#PluginCopyRedChannelAllFramesNameD">PluginCopyRedChannelAllFramesNameD</a></li>
+<li><a href="#PluginCopyZeroAllKeys">PluginCopyZeroAllKeys</a></li>
 <li><a href="#PluginCopyZeroAllKeysAllFrames">PluginCopyZeroAllKeysAllFrames</a></li>
 <li><a href="#PluginCopyZeroAllKeysAllFramesName">PluginCopyZeroAllKeysAllFramesName</a></li>
 <li><a href="#PluginCopyZeroAllKeysAllFramesNameD">PluginCopyZeroAllKeysAllFramesNameD</a></li>
 <li><a href="#PluginCopyZeroAllKeysAllFramesOffset">PluginCopyZeroAllKeysAllFramesOffset</a></li>
 <li><a href="#PluginCopyZeroAllKeysAllFramesOffsetName">PluginCopyZeroAllKeysAllFramesOffsetName</a></li>
 <li><a href="#PluginCopyZeroAllKeysAllFramesOffsetNameD">PluginCopyZeroAllKeysAllFramesOffsetNameD</a></li>
+<li><a href="#PluginCopyZeroAllKeysName">PluginCopyZeroAllKeysName</a></li>
+<li><a href="#PluginCopyZeroAllKeysOffset">PluginCopyZeroAllKeysOffset</a></li>
+<li><a href="#PluginCopyZeroAllKeysOffsetName">PluginCopyZeroAllKeysOffsetName</a></li>
 <li><a href="#PluginCopyZeroKeyColor">PluginCopyZeroKeyColor</a></li>
 <li><a href="#PluginCopyZeroKeyColorName">PluginCopyZeroKeyColorName</a></li>
 <li><a href="#PluginCopyZeroKeyColorNameD">PluginCopyZeroKeyColorNameD</a></li>
+<li><a href="#PluginCopyZeroTargetAllKeys">PluginCopyZeroTargetAllKeys</a></li>
 <li><a href="#PluginCopyZeroTargetAllKeysAllFrames">PluginCopyZeroTargetAllKeysAllFrames</a></li>
 <li><a href="#PluginCopyZeroTargetAllKeysAllFramesName">PluginCopyZeroTargetAllKeysAllFramesName</a></li>
 <li><a href="#PluginCopyZeroTargetAllKeysAllFramesNameD">PluginCopyZeroTargetAllKeysAllFramesNameD</a></li>
+<li><a href="#PluginCopyZeroTargetAllKeysName">PluginCopyZeroTargetAllKeysName</a></li>
 <li><a href="#PluginCoreCreateChromaLinkEffect">PluginCoreCreateChromaLinkEffect</a></li>
 <li><a href="#PluginCoreCreateEffect">PluginCoreCreateEffect</a></li>
 <li><a href="#PluginCoreCreateHeadsetEffect">PluginCoreCreateHeadsetEffect</a></li>
@@ -275,8 +367,22 @@ if (result != RZSUCCESS)
 <li><a href="#PluginCoreCreateMousepadEffect">PluginCoreCreateMousepadEffect</a></li>
 <li><a href="#PluginCoreDeleteEffect">PluginCoreDeleteEffect</a></li>
 <li><a href="#PluginCoreInit">PluginCoreInit</a></li>
+<li><a href="#PluginCoreInitSDK">PluginCoreInitSDK</a></li>
 <li><a href="#PluginCoreQueryDevice">PluginCoreQueryDevice</a></li>
 <li><a href="#PluginCoreSetEffect">PluginCoreSetEffect</a></li>
+<li><a href="#PluginCoreStreamBroadcast">PluginCoreStreamBroadcast</a></li>
+<li><a href="#PluginCoreStreamBroadcastEnd">PluginCoreStreamBroadcastEnd</a></li>
+<li><a href="#PluginCoreStreamGetAuthShortcode">PluginCoreStreamGetAuthShortcode</a></li>
+<li><a href="#PluginCoreStreamGetFocus">PluginCoreStreamGetFocus</a></li>
+<li><a href="#PluginCoreStreamGetId">PluginCoreStreamGetId</a></li>
+<li><a href="#PluginCoreStreamGetKey">PluginCoreStreamGetKey</a></li>
+<li><a href="#PluginCoreStreamGetStatus">PluginCoreStreamGetStatus</a></li>
+<li><a href="#PluginCoreStreamGetStatusString">PluginCoreStreamGetStatusString</a></li>
+<li><a href="#PluginCoreStreamReleaseShortcode">PluginCoreStreamReleaseShortcode</a></li>
+<li><a href="#PluginCoreStreamSetFocus">PluginCoreStreamSetFocus</a></li>
+<li><a href="#PluginCoreStreamSupportsStreaming">PluginCoreStreamSupportsStreaming</a></li>
+<li><a href="#PluginCoreStreamWatch">PluginCoreStreamWatch</a></li>
+<li><a href="#PluginCoreStreamWatchEnd">PluginCoreStreamWatchEnd</a></li>
 <li><a href="#PluginCoreUnInit">PluginCoreUnInit</a></li>
 <li><a href="#PluginCreateAnimation">PluginCreateAnimation</a></li>
 <li><a href="#PluginCreateAnimationInMemory">PluginCreateAnimationInMemory</a></li>
@@ -396,6 +502,8 @@ if (result != RZSUCCESS)
 <li><a href="#PluginGetKeyColor">PluginGetKeyColor</a></li>
 <li><a href="#PluginGetKeyColorD">PluginGetKeyColorD</a></li>
 <li><a href="#PluginGetKeyColorName">PluginGetKeyColorName</a></li>
+<li><a href="#PluginGetLibraryLoadedState">PluginGetLibraryLoadedState</a></li>
+<li><a href="#PluginGetLibraryLoadedStateD">PluginGetLibraryLoadedStateD</a></li>
 <li><a href="#PluginGetMaxColumn">PluginGetMaxColumn</a></li>
 <li><a href="#PluginGetMaxColumnD">PluginGetMaxColumnD</a></li>
 <li><a href="#PluginGetMaxLeds">PluginGetMaxLeds</a></li>
@@ -411,6 +519,7 @@ if (result != RZSUCCESS)
 <li><a href="#PluginHasAnimationLoopNameD">PluginHasAnimationLoopNameD</a></li>
 <li><a href="#PluginInit">PluginInit</a></li>
 <li><a href="#PluginInitD">PluginInitD</a></li>
+<li><a href="#PluginInitSDK">PluginInitSDK</a></li>
 <li><a href="#PluginInsertDelay">PluginInsertDelay</a></li>
 <li><a href="#PluginInsertDelayName">PluginInsertDelayName</a></li>
 <li><a href="#PluginInsertDelayNameD">PluginInsertDelayNameD</a></li>
@@ -493,6 +602,7 @@ if (result != RZSUCCESS)
 <li><a href="#PluginMultiplyTargetColorLerpAllFramesRGB">PluginMultiplyTargetColorLerpAllFramesRGB</a></li>
 <li><a href="#PluginMultiplyTargetColorLerpAllFramesRGBName">PluginMultiplyTargetColorLerpAllFramesRGBName</a></li>
 <li><a href="#PluginMultiplyTargetColorLerpAllFramesRGBNameD">PluginMultiplyTargetColorLerpAllFramesRGBNameD</a></li>
+<li><a href="#PluginMultiplyTargetColorLerpName">PluginMultiplyTargetColorLerpName</a></li>
 <li><a href="#PluginOffsetColors">PluginOffsetColors</a></li>
 <li><a href="#PluginOffsetColorsAllFrames">PluginOffsetColorsAllFrames</a></li>
 <li><a href="#PluginOffsetColorsAllFramesName">PluginOffsetColorsAllFramesName</a></li>
@@ -559,8 +669,12 @@ if (result != RZSUCCESS)
 <li><a href="#PluginSetCurrentFrame">PluginSetCurrentFrame</a></li>
 <li><a href="#PluginSetCurrentFrameName">PluginSetCurrentFrameName</a></li>
 <li><a href="#PluginSetCurrentFrameNameD">PluginSetCurrentFrameNameD</a></li>
+<li><a href="#PluginSetCustomColorFlag2D">PluginSetCustomColorFlag2D</a></li>
 <li><a href="#PluginSetDevice">PluginSetDevice</a></li>
 <li><a href="#PluginSetEffect">PluginSetEffect</a></li>
+<li><a href="#PluginSetEffectCustom1D">PluginSetEffectCustom1D</a></li>
+<li><a href="#PluginSetEffectCustom2D">PluginSetEffectCustom2D</a></li>
+<li><a href="#PluginSetEffectKeyboardCustom2D">PluginSetEffectKeyboardCustom2D</a></li>
 <li><a href="#PluginSetIdleAnimation">PluginSetIdleAnimation</a></li>
 <li><a href="#PluginSetIdleAnimationName">PluginSetIdleAnimationName</a></li>
 <li><a href="#PluginSetKeyColor">PluginSetKeyColor</a></li>
@@ -581,6 +695,7 @@ if (result != RZSUCCESS)
 <li><a href="#PluginSetKeyNonZeroColorRGB">PluginSetKeyNonZeroColorRGB</a></li>
 <li><a href="#PluginSetKeyNonZeroColorRGBName">PluginSetKeyNonZeroColorRGBName</a></li>
 <li><a href="#PluginSetKeyNonZeroColorRGBNameD">PluginSetKeyNonZeroColorRGBNameD</a></li>
+<li><a href="#PluginSetKeyRowColumnColorName">PluginSetKeyRowColumnColorName</a></li>
 <li><a href="#PluginSetKeysColor">PluginSetKeysColor</a></li>
 <li><a href="#PluginSetKeysColorAllFrames">PluginSetKeysColorAllFrames</a></li>
 <li><a href="#PluginSetKeysColorAllFramesName">PluginSetKeysColorAllFramesName</a></li>
@@ -610,6 +725,11 @@ if (result != RZSUCCESS)
 <li><a href="#PluginSetKeyZeroColorRGBName">PluginSetKeyZeroColorRGBName</a></li>
 <li><a href="#PluginSetKeyZeroColorRGBNameD">PluginSetKeyZeroColorRGBNameD</a></li>
 <li><a href="#PluginSetLogDelegate">PluginSetLogDelegate</a></li>
+<li><a href="#PluginSetStaticColor">PluginSetStaticColor</a></li>
+<li><a href="#PluginSetStaticColorAll">PluginSetStaticColorAll</a></li>
+<li><a href="#PluginStaticColor">PluginStaticColor</a></li>
+<li><a href="#PluginStaticColorAll">PluginStaticColorAll</a></li>
+<li><a href="#PluginStaticColorD">PluginStaticColorD</a></li>
 <li><a href="#PluginStopAll">PluginStopAll</a></li>
 <li><a href="#PluginStopAnimation">PluginStopAnimation</a></li>
 <li><a href="#PluginStopAnimationD">PluginStopAnimationD</a></li>
@@ -619,12 +739,15 @@ if (result != RZSUCCESS)
 <li><a href="#PluginStopAnimationTypeD">PluginStopAnimationTypeD</a></li>
 <li><a href="#PluginStopComposite">PluginStopComposite</a></li>
 <li><a href="#PluginStopCompositeD">PluginStopCompositeD</a></li>
+<li><a href="#PluginSubtractColor">PluginSubtractColor</a></li>
+<li><a href="#PluginSubtractNonZeroAllKeys">PluginSubtractNonZeroAllKeys</a></li>
 <li><a href="#PluginSubtractNonZeroAllKeysAllFrames">PluginSubtractNonZeroAllKeysAllFrames</a></li>
 <li><a href="#PluginSubtractNonZeroAllKeysAllFramesName">PluginSubtractNonZeroAllKeysAllFramesName</a></li>
 <li><a href="#PluginSubtractNonZeroAllKeysAllFramesNameD">PluginSubtractNonZeroAllKeysAllFramesNameD</a></li>
 <li><a href="#PluginSubtractNonZeroAllKeysAllFramesOffset">PluginSubtractNonZeroAllKeysAllFramesOffset</a></li>
 <li><a href="#PluginSubtractNonZeroAllKeysAllFramesOffsetName">PluginSubtractNonZeroAllKeysAllFramesOffsetName</a></li>
 <li><a href="#PluginSubtractNonZeroAllKeysAllFramesOffsetNameD">PluginSubtractNonZeroAllKeysAllFramesOffsetNameD</a></li>
+<li><a href="#PluginSubtractNonZeroAllKeysName">PluginSubtractNonZeroAllKeysName</a></li>
 <li><a href="#PluginSubtractNonZeroAllKeysOffset">PluginSubtractNonZeroAllKeysOffset</a></li>
 <li><a href="#PluginSubtractNonZeroAllKeysOffsetName">PluginSubtractNonZeroAllKeysOffsetName</a></li>
 <li><a href="#PluginSubtractNonZeroAllKeysOffsetNameD">PluginSubtractNonZeroAllKeysOffsetNameD</a></li>
@@ -637,6 +760,12 @@ if (result != RZSUCCESS)
 <li><a href="#PluginSubtractNonZeroTargetAllKeysOffset">PluginSubtractNonZeroTargetAllKeysOffset</a></li>
 <li><a href="#PluginSubtractNonZeroTargetAllKeysOffsetName">PluginSubtractNonZeroTargetAllKeysOffsetName</a></li>
 <li><a href="#PluginSubtractNonZeroTargetAllKeysOffsetNameD">PluginSubtractNonZeroTargetAllKeysOffsetNameD</a></li>
+<li><a href="#PluginSubtractThresholdColorsMinMaxAllFramesRGB">PluginSubtractThresholdColorsMinMaxAllFramesRGB</a></li>
+<li><a href="#PluginSubtractThresholdColorsMinMaxAllFramesRGBName">PluginSubtractThresholdColorsMinMaxAllFramesRGBName</a></li>
+<li><a href="#PluginSubtractThresholdColorsMinMaxAllFramesRGBNameD">PluginSubtractThresholdColorsMinMaxAllFramesRGBNameD</a></li>
+<li><a href="#PluginSubtractThresholdColorsMinMaxRGB">PluginSubtractThresholdColorsMinMaxRGB</a></li>
+<li><a href="#PluginSubtractThresholdColorsMinMaxRGBName">PluginSubtractThresholdColorsMinMaxRGBName</a></li>
+<li><a href="#PluginSubtractThresholdColorsMinMaxRGBNameD">PluginSubtractThresholdColorsMinMaxRGBNameD</a></li>
 <li><a href="#PluginTrimEndFrames">PluginTrimEndFrames</a></li>
 <li><a href="#PluginTrimEndFramesName">PluginTrimEndFramesName</a></li>
 <li><a href="#PluginTrimEndFramesNameD">PluginTrimEndFramesNameD</a></li>
@@ -652,9 +781,26 @@ if (result != RZSUCCESS)
 <li><a href="#PluginUnloadAnimationD">PluginUnloadAnimationD</a></li>
 <li><a href="#PluginUnloadAnimationName">PluginUnloadAnimationName</a></li>
 <li><a href="#PluginUnloadComposite">PluginUnloadComposite</a></li>
+<li><a href="#PluginUnloadLibrarySDK">PluginUnloadLibrarySDK</a></li>
+<li><a href="#PluginUnloadLibraryStreamingPlugin">PluginUnloadLibraryStreamingPlugin</a></li>
 <li><a href="#PluginUpdateFrame">PluginUpdateFrame</a></li>
+<li><a href="#PluginUpdateFrameName">PluginUpdateFrameName</a></li>
 <li><a href="#PluginUseIdleAnimation">PluginUseIdleAnimation</a></li>
+<li><a href="#PluginUseIdleAnimations">PluginUseIdleAnimations</a></li>
+<li><a href="#PluginUsePreloading">PluginUsePreloading</a></li>
+<li><a href="#PluginUsePreloadingName">PluginUsePreloadingName</a></li>
 </ul>
+<hr>
+<p><a name="PluginAddColor"></a>
+<strong>PluginAddColor</strong></p>
+<p>Return the sum of colors</p>
+<pre><code class="language-C++">// DLL Interface
+EXPORT_API int PluginAddColor(
+    const int color1, const int color2);
+
+// Class Plugin
+int result = ChromaAnimationAPI::AddColor(
+    const int color1, const int color2);</code></pre>
 <hr>
 <p><a name="PluginAddFrame"></a>
 <strong>PluginAddFrame</strong></p>
@@ -671,6 +817,18 @@ EXPORT_API int PluginAddFrame(
 // Class Plugin
 int result = ChromaAnimationAPI::AddFrame(
     int animationId, float duration, int* colors, int length);</code></pre>
+<hr>
+<p><a name="PluginAddNonZeroAllKeys"></a>
+<strong>PluginAddNonZeroAllKeys</strong></p>
+<p>Add source color to target where color is not black for frame id, reference
+source and target by id.</p>
+<pre><code class="language-C++">// DLL Interface
+EXPORT_API void PluginAddNonZeroAllKeys(
+    int sourceAnimationId, int targetAnimationId, int frameId);
+
+// Class Plugin
+ChromaAnimationAPI::AddNonZeroAllKeys(
+    int sourceAnimationId, int targetAnimationId, int frameId);</code></pre>
 <hr>
 <p><a name="PluginAddNonZeroAllKeysAllFrames"></a>
 <strong>PluginAddNonZeroAllKeysAllFrames</strong></p>
@@ -743,6 +901,18 @@ EXPORT_API double PluginAddNonZeroAllKeysAllFramesOffsetNameD(
 // Class Plugin
 double result = ChromaAnimationAPI::AddNonZeroAllKeysAllFramesOffsetNameD(
     const char* sourceAnimation, const char* targetAnimation, double offset);</code></pre>
+<hr>
+<p><a name="PluginAddNonZeroAllKeysName"></a>
+<strong>PluginAddNonZeroAllKeysName</strong></p>
+<p>Add source color to target where color is not black for frame id, reference
+source and target by name.</p>
+<pre><code class="language-C++">// DLL Interface
+EXPORT_API void PluginAddNonZeroAllKeysName(
+    const char* sourceAnimation, const char* targetAnimation, int frameId);
+
+// Class Plugin
+ChromaAnimationAPI::AddNonZeroAllKeysName(
+    const char* sourceAnimation, const char* targetAnimation, int frameId);</code></pre>
 <hr>
 <p><a name="PluginAddNonZeroAllKeysOffset"></a>
 <strong>PluginAddNonZeroAllKeysOffset</strong></p>
@@ -1014,6 +1184,30 @@ EXPORT_API double PluginCloseCompositeD(const char* name);
 // Class Plugin
 double result = ChromaAnimationAPI::CloseCompositeD(const char* name);</code></pre>
 <hr>
+<p><a name="PluginCopyAllKeys"></a>
+<strong>PluginCopyAllKeys</strong></p>
+<p>Copy source animation to target animation for the given frame. Source and
+target are referenced by id.</p>
+<pre><code class="language-C++">// DLL Interface
+EXPORT_API void PluginCopyAllKeys(
+    int sourceAnimationId, int targetAnimationId, int frameId);
+
+// Class Plugin
+ChromaAnimationAPI::CopyAllKeys(
+    int sourceAnimationId, int targetAnimationId, int frameId);</code></pre>
+<hr>
+<p><a name="PluginCopyAllKeysName"></a>
+<strong>PluginCopyAllKeysName</strong></p>
+<p>Copy source animation to target animation for the given frame. Source and
+target are referenced by id.</p>
+<pre><code class="language-C++">// DLL Interface
+EXPORT_API void PluginCopyAllKeysName(
+    const char* sourceAnimation, const char* targetAnimation, int frameId);
+
+// Class Plugin
+ChromaAnimationAPI::CopyAllKeysName(
+    const char* sourceAnimation, const char* targetAnimation, int frameId);</code></pre>
+<hr>
 <p><a name="PluginCopyAnimation"></a>
 <strong>PluginCopyAnimation</strong></p>
 <p>Copy animation to named target animation in memory. If target animation
@@ -1227,6 +1421,92 @@ EXPORT_API double PluginCopyKeyColorNameD(
 double result = ChromaAnimationAPI::CopyKeyColorNameD(
     const char* sourceAnimation, const char* targetAnimation, double frameId,
     double rzkey);</code></pre>
+<hr>
+<p><a name="PluginCopyKeysColor"></a>
+<strong>PluginCopyKeysColor</strong></p>
+<p>Copy animation color for a set of keys from the source animation to the
+target animation for the given frame. Reference the source and target by
+id.</p>
+<pre><code class="language-C++">// DLL Interface
+EXPORT_API void PluginCopyKeysColor(
+    int sourceAnimationId, int targetAnimationId, int frameId, const int* keys,
+    int size);
+
+// Class Plugin
+ChromaAnimationAPI::CopyKeysColor(
+    int sourceAnimationId, int targetAnimationId, int frameId, const int* keys,
+    int size);</code></pre>
+<hr>
+<p><a name="PluginCopyKeysColorAllFrames"></a>
+<strong>PluginCopyKeysColorAllFrames</strong></p>
+<p>Copy animation color for a set of keys from the source animation to the
+target animation for all frames. Reference the source and target by id.</p>
+<pre><code class="language-C++">// DLL Interface
+EXPORT_API void PluginCopyKeysColorAllFrames(
+    int sourceAnimationId, int targetAnimationId, const int* keys, int size);
+
+// Class Plugin
+ChromaAnimationAPI::CopyKeysColorAllFrames(
+    int sourceAnimationId, int targetAnimationId, const int* keys, int size);</code></pre>
+<hr>
+<p><a name="PluginCopyKeysColorAllFramesName"></a>
+<strong>PluginCopyKeysColorAllFramesName</strong></p>
+<p>Copy animation color for a set of keys from the source animation to the
+target animation for all frames. Reference the source and target by name.</p>
+<pre><code class="language-C++">// DLL Interface
+EXPORT_API void PluginCopyKeysColorAllFramesName(
+    const char* sourceAnimation, const char* targetAnimation, const int* keys,
+    int size);
+
+// Class Plugin
+ChromaAnimationAPI::CopyKeysColorAllFramesName(
+    const char* sourceAnimation, const char* targetAnimation, const int* keys,
+    int size);</code></pre>
+<hr>
+<p><a name="PluginCopyKeysColorName"></a>
+<strong>PluginCopyKeysColorName</strong></p>
+<p>Copy animation color for a set of keys from the source animation to the
+target animation for the given frame. Reference the source and target by
+name.</p>
+<pre><code class="language-C++">// DLL Interface
+EXPORT_API void PluginCopyKeysColorName(
+    const char* sourceAnimation, const char* targetAnimation, int frameId, const int* keys,
+    int size);
+
+// Class Plugin
+ChromaAnimationAPI::CopyKeysColorName(
+    const char* sourceAnimation, const char* targetAnimation, int frameId, const int* keys,
+    int size);</code></pre>
+<hr>
+<p><a name="PluginCopyKeysColorOffset"></a>
+<strong>PluginCopyKeysColorOffset</strong></p>
+<p>Copy animation color for a set of keys from the source animation to the
+target animation from the source frame to the target frame. Reference the
+source and target by id.</p>
+<pre><code class="language-C++">// DLL Interface
+EXPORT_API void PluginCopyKeysColorOffset(
+    int sourceAnimationId, int targetAnimationId, int sourceFrameId, int targetFrameId,
+    const int* keys, int size);
+
+// Class Plugin
+ChromaAnimationAPI::CopyKeysColorOffset(
+    int sourceAnimationId, int targetAnimationId, int sourceFrameId, int targetFrameId,
+    const int* keys, int size);</code></pre>
+<hr>
+<p><a name="PluginCopyKeysColorOffsetName"></a>
+<strong>PluginCopyKeysColorOffsetName</strong></p>
+<p>Copy animation color for a set of keys from the source animation to the
+target animation from the source frame to the target frame. Reference the
+source and target by name.</p>
+<pre><code class="language-C++">// DLL Interface
+EXPORT_API void PluginCopyKeysColorOffsetName(
+    const char* sourceAnimation, const char* targetAnimation, int sourceFrameId,
+    int targetFrameId, const int* keys, int size);
+
+// Class Plugin
+ChromaAnimationAPI::CopyKeysColorOffsetName(
+    const char* sourceAnimation, const char* targetAnimation, int sourceFrameId,
+    int targetFrameId, const int* keys, int size);</code></pre>
 <hr>
 <p><a name="PluginCopyNonZeroAllKeys"></a>
 <strong>PluginCopyNonZeroAllKeys</strong></p>
@@ -1562,6 +1842,43 @@ double result = ChromaAnimationAPI::CopyNonZeroTargetAllKeysOffsetNameD(
     const char* sourceAnimation, const char* targetAnimation, double frameId,
     double offset);</code></pre>
 <hr>
+<p><a name="PluginCopyNonZeroTargetZeroAllKeysAllFrames"></a>
+<strong>PluginCopyNonZeroTargetZeroAllKeysAllFrames</strong></p>
+<p>Copy nonzero colors from the source animation to the target animation where
+the target color is zero for all frames. Source and target are referenced
+by id.</p>
+<pre><code class="language-C++">// DLL Interface
+EXPORT_API void PluginCopyNonZeroTargetZeroAllKeysAllFrames(
+    int sourceAnimationId, int targetAnimationId);
+
+// Class Plugin
+ChromaAnimationAPI::CopyNonZeroTargetZeroAllKeysAllFrames(
+    int sourceAnimationId, int targetAnimationId);</code></pre>
+<hr>
+<p><a name="PluginCopyNonZeroTargetZeroAllKeysAllFramesName"></a>
+<strong>PluginCopyNonZeroTargetZeroAllKeysAllFramesName</strong></p>
+<p>Copy nonzero colors from the source animation to the target animation where
+the target color is zero for all frames. Source and target are referenced
+by name.</p>
+<pre><code class="language-C++">// DLL Interface
+EXPORT_API void PluginCopyNonZeroTargetZeroAllKeysAllFramesName(
+    const char* sourceAnimation, const char* targetAnimation);
+
+// Class Plugin
+ChromaAnimationAPI::CopyNonZeroTargetZeroAllKeysAllFramesName(
+    const char* sourceAnimation, const char* targetAnimation);</code></pre>
+<hr>
+<p><a name="PluginCopyNonZeroTargetZeroAllKeysAllFramesNameD"></a>
+<strong>PluginCopyNonZeroTargetZeroAllKeysAllFramesNameD</strong></p>
+<p>D suffix for limited data types.</p>
+<pre><code class="language-C++">// DLL Interface
+EXPORT_API double PluginCopyNonZeroTargetZeroAllKeysAllFramesNameD(
+    const char* sourceAnimation, const char* targetAnimation);
+
+// Class Plugin
+double result = ChromaAnimationAPI::CopyNonZeroTargetZeroAllKeysAllFramesNameD(
+    const char* sourceAnimation, const char* targetAnimation);</code></pre>
+<hr>
 <p><a name="PluginCopyRedChannelAllFrames"></a>
 <strong>PluginCopyRedChannelAllFrames</strong></p>
 <p>Copy red channel to other channels for all frames. Intensity range is 0.0
@@ -1596,6 +1913,18 @@ EXPORT_API double PluginCopyRedChannelAllFramesNameD(
 // Class Plugin
 double result = ChromaAnimationAPI::CopyRedChannelAllFramesNameD(
     const char* path, double greenIntensity, double blueIntensity);</code></pre>
+<hr>
+<p><a name="PluginCopyZeroAllKeys"></a>
+<strong>PluginCopyZeroAllKeys</strong></p>
+<p>Copy zero colors from source animation to target animation for the frame.
+Source and target are referenced by id.</p>
+<pre><code class="language-C++">// DLL Interface
+EXPORT_API void PluginCopyZeroAllKeys(
+    int sourceAnimationId, int targetAnimationId, int frameId);
+
+// Class Plugin
+ChromaAnimationAPI::CopyZeroAllKeys(
+    int sourceAnimationId, int targetAnimationId, int frameId);</code></pre>
 <hr>
 <p><a name="PluginCopyZeroAllKeysAllFrames"></a>
 <strong>PluginCopyZeroAllKeysAllFrames</strong></p>
@@ -1669,6 +1998,44 @@ EXPORT_API double PluginCopyZeroAllKeysAllFramesOffsetNameD(
 double result = ChromaAnimationAPI::CopyZeroAllKeysAllFramesOffsetNameD(
     const char* sourceAnimation, const char* targetAnimation, double offset);</code></pre>
 <hr>
+<p><a name="PluginCopyZeroAllKeysName"></a>
+<strong>PluginCopyZeroAllKeysName</strong></p>
+<p>Copy zero colors from source animation to target animation for the frame.
+Source and target are referenced by name.</p>
+<pre><code class="language-C++">// DLL Interface
+EXPORT_API void PluginCopyZeroAllKeysName(
+    const char* sourceAnimation, const char* targetAnimation, int frameId);
+
+// Class Plugin
+ChromaAnimationAPI::CopyZeroAllKeysName(
+    const char* sourceAnimation, const char* targetAnimation, int frameId);</code></pre>
+<hr>
+<p><a name="PluginCopyZeroAllKeysOffset"></a>
+<strong>PluginCopyZeroAllKeysOffset</strong></p>
+<p>Copy zero colors from source animation to target animation for the frame
+id starting at the target offset for the length of the source animation.
+Source and target are referenced by id.</p>
+<pre><code class="language-C++">// DLL Interface
+EXPORT_API void PluginCopyZeroAllKeysOffset(
+    int sourceAnimationId, int targetAnimationId, int frameId, int offset);
+
+// Class Plugin
+ChromaAnimationAPI::CopyZeroAllKeysOffset(
+    int sourceAnimationId, int targetAnimationId, int frameId, int offset);</code></pre>
+<hr>
+<p><a name="PluginCopyZeroAllKeysOffsetName"></a>
+<strong>PluginCopyZeroAllKeysOffsetName</strong></p>
+<p>Copy zero colors from source animation to target animation for the frame
+id starting at the target offset for the length of the source animation.
+Source and target are referenced by name.</p>
+<pre><code class="language-C++">// DLL Interface
+EXPORT_API void PluginCopyZeroAllKeysOffsetName(
+    const char* sourceAnimation, const char* targetAnimation, int frameId, int offset);
+
+// Class Plugin
+ChromaAnimationAPI::CopyZeroAllKeysOffsetName(
+    const char* sourceAnimation, const char* targetAnimation, int frameId, int offset);</code></pre>
+<hr>
 <p><a name="PluginCopyZeroKeyColor"></a>
 <strong>PluginCopyZeroKeyColor</strong></p>
 <p>Copy zero key color from source animation to target animation for the specified
@@ -1706,6 +2073,18 @@ double result = ChromaAnimationAPI::CopyZeroKeyColorNameD(
     const char* sourceAnimation, const char* targetAnimation, double frameId,
     double rzkey);</code></pre>
 <hr>
+<p><a name="PluginCopyZeroTargetAllKeys"></a>
+<strong>PluginCopyZeroTargetAllKeys</strong></p>
+<p>Copy nonzero color from source animation to target animation where target
+is zero for the frame. Source and target are referenced by id.</p>
+<pre><code class="language-C++">// DLL Interface
+EXPORT_API void PluginCopyZeroTargetAllKeys(
+    int sourceAnimationId, int targetAnimationId, int frameId);
+
+// Class Plugin
+ChromaAnimationAPI::CopyZeroTargetAllKeys(
+    int sourceAnimationId, int targetAnimationId, int frameId);</code></pre>
+<hr>
 <p><a name="PluginCopyZeroTargetAllKeysAllFrames"></a>
 <strong>PluginCopyZeroTargetAllKeysAllFrames</strong></p>
 <p>Copy nonzero color from source animation to target animation where target
@@ -1741,82 +2120,94 @@ EXPORT_API double PluginCopyZeroTargetAllKeysAllFramesNameD(
 double result = ChromaAnimationAPI::CopyZeroTargetAllKeysAllFramesNameD(
     const char* sourceAnimation, const char* targetAnimation);</code></pre>
 <hr>
+<p><a name="PluginCopyZeroTargetAllKeysName"></a>
+<strong>PluginCopyZeroTargetAllKeysName</strong></p>
+<p>Copy nonzero color from source animation to target animation where target
+is zero for the frame. Source and target are referenced by name.</p>
+<pre><code class="language-C++">// DLL Interface
+EXPORT_API void PluginCopyZeroTargetAllKeysName(
+    const char* sourceAnimation, const char* targetAnimation, int frameId);
+
+// Class Plugin
+ChromaAnimationAPI::CopyZeroTargetAllKeysName(
+    const char* sourceAnimation, const char* targetAnimation, int frameId);</code></pre>
+<hr>
 <p><a name="PluginCoreCreateChromaLinkEffect"></a>
 <strong>PluginCoreCreateChromaLinkEffect</strong></p>
 <p>Direct access to low level API.</p>
 <pre><code class="language-C++">// DLL Interface
 EXPORT_API RZRESULT PluginCoreCreateChromaLinkEffect(
-    ChromaSDK::ChromaLink::EFFECT_TYPE Effect, PRZPARAM pParam, RZEFFECTID *pEffectId);
+    ChromaSDK::ChromaLink::EFFECT_TYPE Effect, PRZPARAM pParam, RZEFFECTID* pEffectId);
 
 // Class Plugin
 RZRESULT result = ChromaAnimationAPI::CoreCreateChromaLinkEffect(
-    ChromaSDK::ChromaLink::EFFECT_TYPE Effect, PRZPARAM pParam, RZEFFECTID *pEffectId);</code></pre>
+    ChromaSDK::ChromaLink::EFFECT_TYPE Effect, PRZPARAM pParam, RZEFFECTID* pEffectId);</code></pre>
 <hr>
 <p><a name="PluginCoreCreateEffect"></a>
 <strong>PluginCoreCreateEffect</strong></p>
 <p>Direct access to low level API.</p>
 <pre><code class="language-C++">// DLL Interface
 EXPORT_API RZRESULT PluginCoreCreateEffect(
-    RZDEVICEID DeviceId, ChromaSDK::EFFECT_TYPE Effect, PRZPARAM pParam, RZEFFECTID *pEffectId);
+    RZDEVICEID DeviceId, ChromaSDK::EFFECT_TYPE Effect, PRZPARAM pParam, RZEFFECTID* pEffectId);
 
 // Class Plugin
 RZRESULT result = ChromaAnimationAPI::CoreCreateEffect(
-    RZDEVICEID DeviceId, ChromaSDK::EFFECT_TYPE Effect, PRZPARAM pParam, RZEFFECTID *pEffectId);</code></pre>
+    RZDEVICEID DeviceId, ChromaSDK::EFFECT_TYPE Effect, PRZPARAM pParam, RZEFFECTID* pEffectId);</code></pre>
 <hr>
 <p><a name="PluginCoreCreateHeadsetEffect"></a>
 <strong>PluginCoreCreateHeadsetEffect</strong></p>
 <p>Direct access to low level API.</p>
 <pre><code class="language-C++">// DLL Interface
 EXPORT_API RZRESULT PluginCoreCreateHeadsetEffect(
-    ChromaSDK::Headset::EFFECT_TYPE Effect, PRZPARAM pParam, RZEFFECTID *pEffectId);
+    ChromaSDK::Headset::EFFECT_TYPE Effect, PRZPARAM pParam, RZEFFECTID* pEffectId);
 
 // Class Plugin
 RZRESULT result = ChromaAnimationAPI::CoreCreateHeadsetEffect(
-    ChromaSDK::Headset::EFFECT_TYPE Effect, PRZPARAM pParam, RZEFFECTID *pEffectId);</code></pre>
+    ChromaSDK::Headset::EFFECT_TYPE Effect, PRZPARAM pParam, RZEFFECTID* pEffectId);</code></pre>
 <hr>
 <p><a name="PluginCoreCreateKeyboardEffect"></a>
 <strong>PluginCoreCreateKeyboardEffect</strong></p>
 <p>Direct access to low level API.</p>
 <pre><code class="language-C++">// DLL Interface
 EXPORT_API RZRESULT PluginCoreCreateKeyboardEffect(
-    ChromaSDK::Keyboard::EFFECT_TYPE Effect, PRZPARAM pParam, RZEFFECTID *pEffectId);
+    ChromaSDK::Keyboard::EFFECT_TYPE Effect, PRZPARAM pParam, RZEFFECTID* pEffectId);
 
 // Class Plugin
 RZRESULT result = ChromaAnimationAPI::CoreCreateKeyboardEffect(
-    ChromaSDK::Keyboard::EFFECT_TYPE Effect, PRZPARAM pParam, RZEFFECTID *pEffectId);</code></pre>
+    ChromaSDK::Keyboard::EFFECT_TYPE Effect, PRZPARAM pParam, RZEFFECTID* pEffectId);</code></pre>
 <hr>
 <p><a name="PluginCoreCreateKeypadEffect"></a>
 <strong>PluginCoreCreateKeypadEffect</strong></p>
 <p>Direct access to low level API.</p>
 <pre><code class="language-C++">// DLL Interface
 EXPORT_API RZRESULT PluginCoreCreateKeypadEffect(
-    ChromaSDK::Keypad::EFFECT_TYPE Effect, PRZPARAM pParam, RZEFFECTID *pEffectId);
+    ChromaSDK::Keypad::EFFECT_TYPE Effect, PRZPARAM pParam, RZEFFECTID* pEffectId);
 
 // Class Plugin
 RZRESULT result = ChromaAnimationAPI::CoreCreateKeypadEffect(
-    ChromaSDK::Keypad::EFFECT_TYPE Effect, PRZPARAM pParam, RZEFFECTID *pEffectId);</code></pre>
+    ChromaSDK::Keypad::EFFECT_TYPE Effect, PRZPARAM pParam, RZEFFECTID* pEffectId);</code></pre>
 <hr>
 <p><a name="PluginCoreCreateMouseEffect"></a>
 <strong>PluginCoreCreateMouseEffect</strong></p>
 <p>Direct access to low level API.</p>
 <pre><code class="language-C++">// DLL Interface
 EXPORT_API RZRESULT PluginCoreCreateMouseEffect(
-    ChromaSDK::Mouse::EFFECT_TYPE Effect, PRZPARAM pParam, RZEFFECTID *pEffectId);
+    ChromaSDK::Mouse::EFFECT_TYPE Effect, PRZPARAM pParam, RZEFFECTID* pEffectId);
 
 // Class Plugin
 RZRESULT result = ChromaAnimationAPI::CoreCreateMouseEffect(
-    ChromaSDK::Mouse::EFFECT_TYPE Effect, PRZPARAM pParam, RZEFFECTID *pEffectId);</code></pre>
+    ChromaSDK::Mouse::EFFECT_TYPE Effect, PRZPARAM pParam, RZEFFECTID* pEffectId);</code></pre>
 <hr>
 <p><a name="PluginCoreCreateMousepadEffect"></a>
 <strong>PluginCoreCreateMousepadEffect</strong></p>
 <p>Direct access to low level API.</p>
 <pre><code class="language-C++">// DLL Interface
 EXPORT_API RZRESULT PluginCoreCreateMousepadEffect(
-    ChromaSDK::Mousepad::EFFECT_TYPE Effect, PRZPARAM pParam, RZEFFECTID *pEffectId);
+    ChromaSDK::Mousepad::EFFECT_TYPE Effect, PRZPARAM pParam, RZEFFECTID* pEffectId);
 
 // Class Plugin
 RZRESULT result = ChromaAnimationAPI::CoreCreateMousepadEffect(
-    ChromaSDK::Mousepad::EFFECT_TYPE Effect, PRZPARAM pParam, RZEFFECTID *pEffectId);</code></pre>
+    ChromaSDK::Mousepad::EFFECT_TYPE Effect, PRZPARAM pParam, RZEFFECTID* pEffectId);</code></pre>
 <hr>
 <p><a name="PluginCoreDeleteEffect"></a>
 <strong>PluginCoreDeleteEffect</strong></p>
@@ -1836,16 +2227,27 @@ EXPORT_API RZRESULT PluginCoreInit();
 // Class Plugin
 RZRESULT result = ChromaAnimationAPI::CoreInit();</code></pre>
 <hr>
+<p><a name="PluginCoreInitSDK"></a>
+<strong>PluginCoreInitSDK</strong></p>
+<p>Direct access to low level API.</p>
+<pre><code class="language-C++">// DLL Interface
+EXPORT_API RZRESULT PluginCoreInitSDK(
+    ChromaSDK::APPINFOTYPE* AppInfo);
+
+// Class Plugin
+RZRESULT result = ChromaAnimationAPI::CoreInitSDK(
+    ChromaSDK::APPINFOTYPE* AppInfo);</code></pre>
+<hr>
 <p><a name="PluginCoreQueryDevice"></a>
 <strong>PluginCoreQueryDevice</strong></p>
 <p>Direct access to low level API.</p>
 <pre><code class="language-C++">// DLL Interface
 EXPORT_API RZRESULT PluginCoreQueryDevice(
-    RZDEVICEID DeviceId, ChromaSDK::DEVICE_INFO_TYPE &amp;DeviceInfo);
+    RZDEVICEID DeviceId, ChromaSDK::DEVICE_INFO_TYPE&amp; DeviceInfo);
 
 // Class Plugin
 RZRESULT result = ChromaAnimationAPI::CoreQueryDevice(
-    RZDEVICEID DeviceId, ChromaSDK::DEVICE_INFO_TYPE &amp;DeviceInfo);</code></pre>
+    RZDEVICEID DeviceId, ChromaSDK::DEVICE_INFO_TYPE&amp; DeviceInfo);</code></pre>
 <hr>
 <p><a name="PluginCoreSetEffect"></a>
 <strong>PluginCoreSetEffect</strong></p>
@@ -1855,6 +2257,187 @@ EXPORT_API RZRESULT PluginCoreSetEffect(RZEFFECTID EffectId);
 
 // Class Plugin
 RZRESULT result = ChromaAnimationAPI::CoreSetEffect(RZEFFECTID EffectId);</code></pre>
+<hr>
+<p><a name="PluginCoreStreamBroadcast"></a>
+<strong>PluginCoreStreamBroadcast</strong></p>
+<p>Begin broadcasting Chroma RGB data using the stored stream key as the endpoint.
+Intended for Cloud Gaming Platforms,  restore the streaming key when the
+game instance is launched to continue streaming.  streamId is a null terminated
+string  streamKey is a null terminated string  StreamGetStatus() should
+return the READY status to use this method.</p>
+<pre><code class="language-C++">// DLL Interface
+EXPORT_API bool PluginCoreStreamBroadcast(
+    const char* streamId, const char* streamKey);
+
+// Class Plugin
+bool result = ChromaAnimationAPI::CoreStreamBroadcast(
+    const char* streamId, const char* streamKey);</code></pre>
+<hr>
+<p><a name="PluginCoreStreamBroadcastEnd"></a>
+<strong>PluginCoreStreamBroadcastEnd</strong></p>
+<p>End broadcasting Chroma RGB data.  StreamGetStatus() should return the BROADCASTING
+status to use this method.</p>
+<pre><code class="language-C++">// DLL Interface
+EXPORT_API bool PluginCoreStreamBroadcastEnd();
+
+// Class Plugin
+bool result = ChromaAnimationAPI::CoreStreamBroadcastEnd();</code></pre>
+<hr>
+<p><a name="PluginCoreStreamGetAuthShortcode"></a>
+<strong>PluginCoreStreamGetAuthShortcode</strong></p>
+<p>shortcode: Pass the address of a preallocated character buffer to get the
+streaming auth code. The buffer should have a minimum length of 6.  length:
+Length will return as zero if the streaming auth code could not be obtained.
+If length is greater than zero, it will be the length of the returned streaming
+auth code.  Once you have the shortcode, it should be shown to the user
+so they can associate the stream with their Razer ID  StreamGetStatus()
+should return the READY status before invoking this method. platform: is
+the null terminated string that identifies the source of the stream: {
+GEFORCE_NOW, LUNA, STADIA, GAME_PASS } title: is the null terminated string
+that identifies the application or game.</p>
+<pre><code class="language-C++">// DLL Interface
+EXPORT_API void PluginCoreStreamGetAuthShortcode(
+    char* shortcode, unsigned char* length, const wchar_t* platform, const wchar_t* title);
+
+// Class Plugin
+ChromaAnimationAPI::CoreStreamGetAuthShortcode(
+    char* shortcode, unsigned char* length, const wchar_t* platform, const wchar_t* title);</code></pre>
+<hr>
+<p><a name="PluginCoreStreamGetFocus"></a>
+<strong>PluginCoreStreamGetFocus</strong></p>
+<p>focus: Pass the address of a preallocated character buffer to get the stream
+focus. The buffer should have a length of 48  length: Length will return
+as zero if the stream focus could not be obtained. If length is greater
+than zero, it will be the length of the returned stream focus.</p>
+<pre><code class="language-C++">// DLL Interface
+EXPORT_API bool PluginCoreStreamGetFocus(
+    char* focus, unsigned char* length);
+
+// Class Plugin
+bool result = ChromaAnimationAPI::CoreStreamGetFocus(
+    char* focus, unsigned char* length);</code></pre>
+<hr>
+<p><a name="PluginCoreStreamGetId"></a>
+<strong>PluginCoreStreamGetId</strong></p>
+<p>Intended for Cloud Gaming Platforms, store the stream id to persist in user
+preferences to continue streaming if the game is suspended or closed. shortcode:
+The shortcode is a null terminated string. Use the shortcode that authorized
+the stream to obtain the stream id.  streamId should be a preallocated
+buffer to get the stream key. The buffer should have a length of 48.  length:
+Length will return zero if the key could not be obtained. If the length
+is greater than zero, it will be the length of the returned streaming id.
+Retrieve the stream id after authorizing the shortcode. The authorization
+window will expire in 5 minutes. Be sure to save the stream key before
+the window expires. StreamGetStatus() should return the READY status to
+use this method.</p>
+<pre><code class="language-C++">// DLL Interface
+EXPORT_API void PluginCoreStreamGetId(
+    const char* shortcode, char* streamId, unsigned char* length);
+
+// Class Plugin
+ChromaAnimationAPI::CoreStreamGetId(
+    const char* shortcode, char* streamId, unsigned char* length);</code></pre>
+<hr>
+<p><a name="PluginCoreStreamGetKey"></a>
+<strong>PluginCoreStreamGetKey</strong></p>
+<p>Intended for Cloud Gaming Platforms, store the streaming key to persist
+in user preferences to continue streaming if the game is suspended or closed.
+shortcode: The shortcode is a null terminated string. Use the shortcode
+that authorized the stream to obtain the stream key.  If the status is
+in the BROADCASTING or WATCHING state, passing a NULL shortcode will return
+the active streamId.  streamKey should be a preallocated buffer to get
+the stream key. The buffer should have a length of 48.  length: Length
+will return zero if the key could not be obtained. If the length is greater
+than zero, it will be the length of the returned streaming key.  Retrieve
+the stream key after authorizing the shortcode. The authorization window
+will expire in 5 minutes. Be sure to save the stream key before the window
+expires.  StreamGetStatus() should return the READY status to use this
+method.</p>
+<pre><code class="language-C++">// DLL Interface
+EXPORT_API void PluginCoreStreamGetKey(
+    const char* shortcode, char* streamKey, unsigned char* length);
+
+// Class Plugin
+ChromaAnimationAPI::CoreStreamGetKey(
+    const char* shortcode, char* streamKey, unsigned char* length);</code></pre>
+<hr>
+<p><a name="PluginCoreStreamGetStatus"></a>
+<strong>PluginCoreStreamGetStatus</strong></p>
+<p>Returns StreamStatus, the current status of the service</p>
+<pre><code class="language-C++">// DLL Interface
+EXPORT_API ChromaSDK::Stream::StreamStatusType PluginCoreStreamGetStatus();
+
+// Class Plugin
+ChromaSDK::Stream::StreamStatusType result = ChromaAnimationAPI::CoreStreamGetStatus();</code></pre>
+<hr>
+<p><a name="PluginCoreStreamGetStatusString"></a>
+<strong>PluginCoreStreamGetStatusString</strong></p>
+<p>Convert StreamStatusType to a printable string</p>
+<pre><code class="language-C++">// DLL Interface
+EXPORT_API const char* PluginCoreStreamGetStatusString(
+    ChromaSDK::Stream::StreamStatusType status);
+
+// Class Plugin
+const char* result = ChromaAnimationAPI::CoreStreamGetStatusString(
+    ChromaSDK::Stream::StreamStatusType status);</code></pre>
+<hr>
+<p><a name="PluginCoreStreamReleaseShortcode"></a>
+<strong>PluginCoreStreamReleaseShortcode</strong></p>
+<p>This prevents the stream id and stream key from being obtained through the
+shortcode. This closes the auth window.  shortcode is a null terminated
+string.  StreamGetStatus() should return the READY status to use this method.
+returns success when shortcode has been released</p>
+<pre><code class="language-C++">// DLL Interface
+EXPORT_API bool PluginCoreStreamReleaseShortcode(
+    const char* shortcode);
+
+// Class Plugin
+bool result = ChromaAnimationAPI::CoreStreamReleaseShortcode(
+    const char* shortcode);</code></pre>
+<hr>
+<p><a name="PluginCoreStreamSetFocus"></a>
+<strong>PluginCoreStreamSetFocus</strong></p>
+<p>The focus is a null terminated string. Set the focus identifer for the application
+designated to automatically change the streaming state.  Returns true on
+success.</p>
+<pre><code class="language-C++">// DLL Interface
+EXPORT_API bool PluginCoreStreamSetFocus(const char* focus);
+
+// Class Plugin
+bool result = ChromaAnimationAPI::CoreStreamSetFocus(const char* focus);</code></pre>
+<hr>
+<p><a name="PluginCoreStreamSupportsStreaming"></a>
+<strong>PluginCoreStreamSupportsStreaming</strong></p>
+<p>Returns true if the Chroma streaming is supported. If false is returned,
+avoid calling stream methods.</p>
+<pre><code class="language-C++">// DLL Interface
+EXPORT_API bool PluginCoreStreamSupportsStreaming();
+
+// Class Plugin
+bool result = ChromaAnimationAPI::CoreStreamSupportsStreaming();</code></pre>
+<hr>
+<p><a name="PluginCoreStreamWatch"></a>
+<strong>PluginCoreStreamWatch</strong></p>
+<p>Begin watching the Chroma RGB data using streamID parameter.  streamId is
+a null terminated string.  StreamGetStatus() should return the READY status
+to use this method.</p>
+<pre><code class="language-C++">// DLL Interface
+EXPORT_API bool PluginCoreStreamWatch(
+    const char* streamId, unsigned long long timestamp);
+
+// Class Plugin
+bool result = ChromaAnimationAPI::CoreStreamWatch(
+    const char* streamId, unsigned long long timestamp);</code></pre>
+<hr>
+<p><a name="PluginCoreStreamWatchEnd"></a>
+<strong>PluginCoreStreamWatchEnd</strong></p>
+<p>End watching Chroma RGB data stream.  StreamGetStatus() should return the
+WATCHING status to use this method.</p>
+<pre><code class="language-C++">// DLL Interface
+EXPORT_API bool PluginCoreStreamWatchEnd();
+
+// Class Plugin
+bool result = ChromaAnimationAPI::CoreStreamWatchEnd();</code></pre>
 <hr>
 <p><a name="PluginCoreUnInit"></a>
 <strong>PluginCoreUnInit</strong></p>
@@ -3248,6 +3831,27 @@ EXPORT_API int PluginGetKeyColorName(
 int result = ChromaAnimationAPI::GetKeyColorName(
     const char* path, int frameId, int rzkey);</code></pre>
 <hr>
+<p><a name="PluginGetLibraryLoadedState"></a>
+<strong>PluginGetLibraryLoadedState</strong></p>
+<p>Returns <code>RZRESULT_SUCCESS</code> if the plugin has been initialized successfully.
+Returns <code>RZRESULT_DLL_NOT_FOUND</code> if core Chroma library is not found. Returns
+<code>RZRESULT_DLL_INVALID_SIGNATURE</code> if core Chroma library has an invalid
+signature.</p>
+<pre><code class="language-C++">// DLL Interface
+EXPORT_API RZRESULT PluginGetLibraryLoadedState();
+
+// Class Plugin
+RZRESULT result = ChromaAnimationAPI::GetLibraryLoadedState();</code></pre>
+<hr>
+<p><a name="PluginGetLibraryLoadedStateD"></a>
+<strong>PluginGetLibraryLoadedStateD</strong></p>
+<p>D suffix for limited data types.</p>
+<pre><code class="language-C++">// DLL Interface
+EXPORT_API double PluginGetLibraryLoadedStateD();
+
+// Class Plugin
+double result = ChromaAnimationAPI::GetLibraryLoadedStateD();</code></pre>
+<hr>
 <p><a name="PluginGetMaxColumn"></a>
 <strong>PluginGetMaxColumn</strong></p>
 <p>Returns the <code>MAX COLUMN</code> given the <code>EChromaSDKDevice2DEnum</code> device as an
@@ -3380,10 +3984,10 @@ double result = ChromaAnimationAPI::HasAnimationLoopNameD(const char* path);</co
 <p>Initialize the ChromaSDK. Zero indicates  success, otherwise failure. Many
 API methods auto initialize the ChromaSDK if not already initialized.</p>
 <pre><code class="language-C++">// DLL Interface
-EXPORT_API int PluginInit();
+EXPORT_API RZRESULT PluginInit();
 
 // Class Plugin
-int result = ChromaAnimationAPI::Init();</code></pre>
+RZRESULT result = ChromaAnimationAPI::Init();</code></pre>
 <hr>
 <p><a name="PluginInitD"></a>
 <strong>PluginInitD</strong></p>
@@ -3393,6 +3997,19 @@ EXPORT_API double PluginInitD();
 
 // Class Plugin
 double result = ChromaAnimationAPI::InitD();</code></pre>
+<hr>
+<p><a name="PluginInitSDK"></a>
+<strong>PluginInitSDK</strong></p>
+<p>Initialize the ChromaSDK. AppInfo populates the details in Synapse. Zero
+indicates  success, otherwise failure. Many API methods auto initialize
+the ChromaSDK if not already initialized.</p>
+<pre><code class="language-C++">// DLL Interface
+EXPORT_API RZRESULT PluginInitSDK(
+    ChromaSDK::APPINFOTYPE* AppInfo);
+
+// Class Plugin
+RZRESULT result = ChromaAnimationAPI::InitSDK(
+    ChromaSDK::APPINFOTYPE* AppInfo);</code></pre>
 <hr>
 <p><a name="PluginInsertDelay"></a>
 <strong>PluginInsertDelay</strong></p>
@@ -4336,6 +4953,19 @@ double result = ChromaAnimationAPI::MultiplyTargetColorLerpAllFramesRGBNameD(
     const char* path, double red1, double green1, double blue1, double red2,
     double green2, double blue2);</code></pre>
 <hr>
+<p><a name="PluginMultiplyTargetColorLerpName"></a>
+<strong>PluginMultiplyTargetColorLerpName</strong></p>
+<p>Multiply the specific frame by the color lerp result between color 1 and
+2 using the frame color value as the <code>t</code> value. Animation is referenced
+by name.</p>
+<pre><code class="language-C++">// DLL Interface
+EXPORT_API void PluginMultiplyTargetColorLerpName(
+    const char* path, int frameId, int color1, int color2);
+
+// Class Plugin
+ChromaAnimationAPI::MultiplyTargetColorLerpName(
+    const char* path, int frameId, int color1, int color2);</code></pre>
+<hr>
 <p><a name="PluginOffsetColors"></a>
 <strong>PluginOffsetColors</strong></p>
 <p>Offset all colors in the frame using the RGB offset. Use the range of -255
@@ -4511,17 +5141,17 @@ double result = ChromaAnimationAPI::OpenAnimationD(const char* path);</code></pr
 <p><a name="PluginOpenAnimationFromMemory"></a>
 <strong>PluginOpenAnimationFromMemory</strong></p>
 <p>Opens a <code>Chroma</code> animation data from memory so that it can be played. <code>Data</code>
-is a pointer to byte array of the loaded animation in memory. <code>Name</code> will
+is a pointer to BYTE array of the loaded animation in memory. <code>Name</code> will
 be assigned to the animation when loaded. Returns an animation id &gt;= 0
 upon success. Returns -1 if there was a failure. The animation id is used
 in most of the API methods.</p>
 <pre><code class="language-C++">// DLL Interface
 EXPORT_API int PluginOpenAnimationFromMemory(
-    const byte* data, const char* name);
+    const BYTE* data, const char* name);
 
 // Class Plugin
 int result = ChromaAnimationAPI::OpenAnimationFromMemory(
-    const byte* data, const char* name);</code></pre>
+    const BYTE* data, const char* name);</code></pre>
 <hr>
 <p><a name="PluginOpenEditorDialog"></a>
 <strong>PluginOpenEditorDialog</strong></p>
@@ -5090,6 +5720,17 @@ EXPORT_API double PluginSetCurrentFrameNameD(
 double result = ChromaAnimationAPI::SetCurrentFrameNameD(
     const char* path, double frameId);</code></pre>
 <hr>
+<p><a name="PluginSetCustomColorFlag2D"></a>
+<strong>PluginSetCustomColorFlag2D</strong></p>
+<p>Set the custom alpha flag on the color array</p>
+<pre><code class="language-C++">// DLL Interface
+EXPORT_API RZRESULT PluginSetCustomColorFlag2D(
+    int device, int* colors);
+
+// Class Plugin
+RZRESULT result = ChromaAnimationAPI::SetCustomColorFlag2D(
+    int device, int* colors);</code></pre>
+<hr>
 <p><a name="PluginSetDevice"></a>
 <strong>PluginSetDevice</strong></p>
 <p>Changes the <code>deviceType</code> and <code>device</code> of a <code>Chroma</code> animation. If the device
@@ -5113,6 +5754,40 @@ EXPORT_API RZRESULT PluginSetEffect(
 // Class Plugin
 RZRESULT result = ChromaAnimationAPI::SetEffect(
     const ChromaSDK::FChromaSDKGuid&amp; effectId);</code></pre>
+<hr>
+<p><a name="PluginSetEffectCustom1D"></a>
+<strong>PluginSetEffectCustom1D</strong></p>
+<p>SetEffectCustom1D will display the referenced colors immediately</p>
+<pre><code class="language-C++">// DLL Interface
+EXPORT_API RZRESULT PluginSetEffectCustom1D(
+    const int device, const int* colors);
+
+// Class Plugin
+RZRESULT result = ChromaAnimationAPI::SetEffectCustom1D(
+    const int device, const int* colors);</code></pre>
+<hr>
+<p><a name="PluginSetEffectCustom2D"></a>
+<strong>PluginSetEffectCustom2D</strong></p>
+<p>SetEffectCustom2D will display the referenced colors immediately</p>
+<pre><code class="language-C++">// DLL Interface
+EXPORT_API RZRESULT PluginSetEffectCustom2D(
+    const int device, const int* colors);
+
+// Class Plugin
+RZRESULT result = ChromaAnimationAPI::SetEffectCustom2D(
+    const int device, const int* colors);</code></pre>
+<hr>
+<p><a name="PluginSetEffectKeyboardCustom2D"></a>
+<strong>PluginSetEffectKeyboardCustom2D</strong></p>
+<p>SetEffectKeyboardCustom2D will display the referenced custom keyboard colors
+immediately</p>
+<pre><code class="language-C++">// DLL Interface
+EXPORT_API RZRESULT PluginSetEffectKeyboardCustom2D(
+    const int device, const int* colors);
+
+// Class Plugin
+RZRESULT result = ChromaAnimationAPI::SetEffectKeyboardCustom2D(
+    const int device, const int* colors);</code></pre>
 <hr>
 <p><a name="PluginSetIdleAnimation"></a>
 <strong>PluginSetIdleAnimation</strong></p>
@@ -5345,6 +6020,17 @@ EXPORT_API double PluginSetKeyNonZeroColorRGBNameD(
 double result = ChromaAnimationAPI::SetKeyNonZeroColorRGBNameD(
     const char* path, double frameId, double rzkey, double red, double green,
     double blue);</code></pre>
+<hr>
+<p><a name="PluginSetKeyRowColumnColorName"></a>
+<strong>PluginSetKeyRowColumnColorName</strong></p>
+<p>Set animation key by row and column to a static color for the given frame.</p>
+<pre><code class="language-C++">// DLL Interface
+EXPORT_API void PluginSetKeyRowColumnColorName(
+    const char* path, int frameId, int row, int column, int color);
+
+// Class Plugin
+ChromaAnimationAPI::SetKeyRowColumnColorName(
+    const char* path, int frameId, int row, int column, int color);</code></pre>
 <hr>
 <p><a name="PluginSetKeysColor"></a>
 <strong>PluginSetKeysColor</strong></p>
@@ -5704,6 +6390,57 @@ EXPORT_API void PluginSetLogDelegate(DebugLogPtr fp);
 // Class Plugin
 ChromaAnimationAPI::SetLogDelegate(DebugLogPtr fp);</code></pre>
 <hr>
+<p><a name="PluginSetStaticColor"></a>
+<strong>PluginSetStaticColor</strong></p>
+<p>Sets the target device to the static color.</p>
+<pre><code class="language-C++">// DLL Interface
+EXPORT_API void PluginSetStaticColor(
+    int deviceType, int device, int color);
+
+// Class Plugin
+ChromaAnimationAPI::SetStaticColor(
+    int deviceType, int device, int color);</code></pre>
+<hr>
+<p><a name="PluginSetStaticColorAll"></a>
+<strong>PluginSetStaticColorAll</strong></p>
+<p>Sets all devices to the static color.</p>
+<pre><code class="language-C++">// DLL Interface
+EXPORT_API void PluginSetStaticColorAll(int color);
+
+// Class Plugin
+ChromaAnimationAPI::SetStaticColorAll(int color);</code></pre>
+<hr>
+<p><a name="PluginStaticColor"></a>
+<strong>PluginStaticColor</strong></p>
+<p>Sets the target device to the static color.</p>
+<pre><code class="language-C++">// DLL Interface
+EXPORT_API void PluginStaticColor(
+    int deviceType, int device, int color);
+
+// Class Plugin
+ChromaAnimationAPI::StaticColor(
+    int deviceType, int device, int color);</code></pre>
+<hr>
+<p><a name="PluginStaticColorAll"></a>
+<strong>PluginStaticColorAll</strong></p>
+<p>Sets all devices to the static color.</p>
+<pre><code class="language-C++">// DLL Interface
+EXPORT_API void PluginStaticColorAll(int color);
+
+// Class Plugin
+ChromaAnimationAPI::StaticColorAll(int color);</code></pre>
+<hr>
+<p><a name="PluginStaticColorD"></a>
+<strong>PluginStaticColorD</strong></p>
+<p>D suffix for limited data types.</p>
+<pre><code class="language-C++">// DLL Interface
+EXPORT_API double PluginStaticColorD(
+    double deviceType, double device, double color);
+
+// Class Plugin
+double result = ChromaAnimationAPI::StaticColorD(
+    double deviceType, double device, double color);</code></pre>
+<hr>
 <p><a name="PluginStopAll"></a>
 <strong>PluginStopAll</strong></p>
 <p><code>PluginStopAll</code> will automatically stop all animations that are playing.</p>
@@ -5796,6 +6533,29 @@ EXPORT_API double PluginStopCompositeD(const char* name);
 // Class Plugin
 double result = ChromaAnimationAPI::StopCompositeD(const char* name);</code></pre>
 <hr>
+<p><a name="PluginSubtractColor"></a>
+<strong>PluginSubtractColor</strong></p>
+<p>Return color1 - color2</p>
+<pre><code class="language-C++">// DLL Interface
+EXPORT_API int PluginSubtractColor(
+    const int color1, const int color2);
+
+// Class Plugin
+int result = ChromaAnimationAPI::SubtractColor(
+    const int color1, const int color2);</code></pre>
+<hr>
+<p><a name="PluginSubtractNonZeroAllKeys"></a>
+<strong>PluginSubtractNonZeroAllKeys</strong></p>
+<p>Subtract the source color from the target color for the frame where the
+target color is not black. Source and target are referenced by id.</p>
+<pre><code class="language-C++">// DLL Interface
+EXPORT_API void PluginSubtractNonZeroAllKeys(
+    int sourceAnimationId, int targetAnimationId, int frameId);
+
+// Class Plugin
+ChromaAnimationAPI::SubtractNonZeroAllKeys(
+    int sourceAnimationId, int targetAnimationId, int frameId);</code></pre>
+<hr>
 <p><a name="PluginSubtractNonZeroAllKeysAllFrames"></a>
 <strong>PluginSubtractNonZeroAllKeysAllFrames</strong></p>
 <p>Subtract the source color from the target color for all frames where the
@@ -5867,6 +6627,18 @@ EXPORT_API double PluginSubtractNonZeroAllKeysAllFramesOffsetNameD(
 // Class Plugin
 double result = ChromaAnimationAPI::SubtractNonZeroAllKeysAllFramesOffsetNameD(
     const char* sourceAnimation, const char* targetAnimation, double offset);</code></pre>
+<hr>
+<p><a name="PluginSubtractNonZeroAllKeysName"></a>
+<strong>PluginSubtractNonZeroAllKeysName</strong></p>
+<p>Subtract the source color from the target color for the frame where the
+target color is not black. Source and target are referenced by name.</p>
+<pre><code class="language-C++">// DLL Interface
+EXPORT_API void PluginSubtractNonZeroAllKeysName(
+    const char* sourceAnimation, const char* targetAnimation, int frameId);
+
+// Class Plugin
+ChromaAnimationAPI::SubtractNonZeroAllKeysName(
+    const char* sourceAnimation, const char* targetAnimation, int frameId);</code></pre>
 <hr>
 <p><a name="PluginSubtractNonZeroAllKeysOffset"></a>
 <strong>PluginSubtractNonZeroAllKeysOffset</strong></p>
@@ -6016,6 +6788,102 @@ double result = ChromaAnimationAPI::SubtractNonZeroTargetAllKeysOffsetNameD(
     const char* sourceAnimation, const char* targetAnimation, double frameId,
     double offset);</code></pre>
 <hr>
+<p><a name="PluginSubtractThresholdColorsMinMaxAllFramesRGB"></a>
+<strong>PluginSubtractThresholdColorsMinMaxAllFramesRGB</strong></p>
+<p>Subtract all frames with the min RGB color where the animation color is
+less than the min threshold AND with the max RGB color where the animation
+is more than the max threshold. Animation is referenced by id.</p>
+<pre><code class="language-C++">// DLL Interface
+EXPORT_API void PluginSubtractThresholdColorsMinMaxAllFramesRGB(
+    const int animationId, const int minThreshold, const int minRed, const int minGreen,
+    const int minBlue, const int maxThreshold, const int maxRed, const int maxGreen,
+    const int maxBlue);
+
+// Class Plugin
+ChromaAnimationAPI::SubtractThresholdColorsMinMaxAllFramesRGB(
+    const int animationId, const int minThreshold, const int minRed, const int minGreen,
+    const int minBlue, const int maxThreshold, const int maxRed, const int maxGreen,
+    const int maxBlue);</code></pre>
+<hr>
+<p><a name="PluginSubtractThresholdColorsMinMaxAllFramesRGBName"></a>
+<strong>PluginSubtractThresholdColorsMinMaxAllFramesRGBName</strong></p>
+<p>Subtract all frames with the min RGB color where the animation color is
+less than the min threshold AND with the max RGB color where the animation
+is more than the max threshold. Animation is referenced by name.</p>
+<pre><code class="language-C++">// DLL Interface
+EXPORT_API void PluginSubtractThresholdColorsMinMaxAllFramesRGBName(
+    const char* path, const int minThreshold, const int minRed, const int minGreen,
+    const int minBlue, const int maxThreshold, const int maxRed, const int maxGreen,
+    const int maxBlue);
+
+// Class Plugin
+ChromaAnimationAPI::SubtractThresholdColorsMinMaxAllFramesRGBName(
+    const char* path, const int minThreshold, const int minRed, const int minGreen,
+    const int minBlue, const int maxThreshold, const int maxRed, const int maxGreen,
+    const int maxBlue);</code></pre>
+<hr>
+<p><a name="PluginSubtractThresholdColorsMinMaxAllFramesRGBNameD"></a>
+<strong>PluginSubtractThresholdColorsMinMaxAllFramesRGBNameD</strong></p>
+<p>D suffix for limited data types.</p>
+<pre><code class="language-C++">// DLL Interface
+EXPORT_API double PluginSubtractThresholdColorsMinMaxAllFramesRGBNameD(
+    const char* path, double minThreshold, double minRed, double minGreen, double minBlue,
+    double maxThreshold, double maxRed, double maxGreen, double maxBlue);
+
+// Class Plugin
+double result = ChromaAnimationAPI::SubtractThresholdColorsMinMaxAllFramesRGBNameD(
+    const char* path, double minThreshold, double minRed, double minGreen, double minBlue,
+    double maxThreshold, double maxRed, double maxGreen, double maxBlue);</code></pre>
+<hr>
+<p><a name="PluginSubtractThresholdColorsMinMaxRGB"></a>
+<strong>PluginSubtractThresholdColorsMinMaxRGB</strong></p>
+<p>Subtract the specified frame with the min RGB color where the animation
+color is less than the min threshold AND with the max RGB color where the
+animation is more than the max threshold. Animation is referenced by id.</p>
+<pre><code class="language-C++">// DLL Interface
+EXPORT_API void PluginSubtractThresholdColorsMinMaxRGB(
+    const int animationId, const int frameId, const int minThreshold, const int minRed,
+    const int minGreen, const int minBlue, const int maxThreshold, const int maxRed,
+    const int maxGreen, const int maxBlue);
+
+// Class Plugin
+ChromaAnimationAPI::SubtractThresholdColorsMinMaxRGB(
+    const int animationId, const int frameId, const int minThreshold, const int minRed,
+    const int minGreen, const int minBlue, const int maxThreshold, const int maxRed,
+    const int maxGreen, const int maxBlue);</code></pre>
+<hr>
+<p><a name="PluginSubtractThresholdColorsMinMaxRGBName"></a>
+<strong>PluginSubtractThresholdColorsMinMaxRGBName</strong></p>
+<p>Subtract the specified frame with the min RGB color where the animation
+color is less than the min threshold AND with the max RGB color where the
+animation is more than the max threshold. Animation is referenced by name.</p>
+<pre><code class="language-C++">// DLL Interface
+EXPORT_API void PluginSubtractThresholdColorsMinMaxRGBName(
+    const char* path, const int frameId, const int minThreshold, const int minRed,
+    const int minGreen, const int minBlue, const int maxThreshold, const int maxRed,
+    const int maxGreen, const int maxBlue);
+
+// Class Plugin
+ChromaAnimationAPI::SubtractThresholdColorsMinMaxRGBName(
+    const char* path, const int frameId, const int minThreshold, const int minRed,
+    const int minGreen, const int minBlue, const int maxThreshold, const int maxRed,
+    const int maxGreen, const int maxBlue);</code></pre>
+<hr>
+<p><a name="PluginSubtractThresholdColorsMinMaxRGBNameD"></a>
+<strong>PluginSubtractThresholdColorsMinMaxRGBNameD</strong></p>
+<p>D suffix for limited data types.</p>
+<pre><code class="language-C++">// DLL Interface
+EXPORT_API double PluginSubtractThresholdColorsMinMaxRGBNameD(
+    const char* path, const int frameId, const int minThreshold, const int minRed,
+    const int minGreen, const int minBlue, const int maxThreshold, const int maxRed,
+    const int maxGreen, const int maxBlue);
+
+// Class Plugin
+double result = ChromaAnimationAPI::SubtractThresholdColorsMinMaxRGBNameD(
+    const char* path, const int frameId, const int minThreshold, const int minRed,
+    const int minGreen, const int minBlue, const int maxThreshold, const int maxRed,
+    const int maxGreen, const int maxBlue);</code></pre>
+<hr>
 <p><a name="PluginTrimEndFrames"></a>
 <strong>PluginTrimEndFrames</strong></p>
 <p>Trim the end of the animation. The length of the animation will be the lastFrameId</p>
@@ -6133,10 +7001,10 @@ double result = ChromaAnimationAPI::TrimStartFramesNameD(
 <strong>PluginUninit</strong></p>
 <p>Uninitializes the <code>ChromaSDK</code>. Returns 0 upon success. Returns -1 upon failure.</p>
 <pre><code class="language-C++">// DLL Interface
-EXPORT_API int PluginUninit();
+EXPORT_API RZRESULT PluginUninit();
 
 // Class Plugin
-int result = ChromaAnimationAPI::Uninit();</code></pre>
+RZRESULT result = ChromaAnimationAPI::Uninit();</code></pre>
 <hr>
 <p><a name="PluginUninitD"></a>
 <strong>PluginUninitD</strong></p>
@@ -6185,6 +7053,24 @@ EXPORT_API void PluginUnloadComposite(const char* name);
 // Class Plugin
 ChromaAnimationAPI::UnloadComposite(const char* name);</code></pre>
 <hr>
+<p><a name="PluginUnloadLibrarySDK"></a>
+<strong>PluginUnloadLibrarySDK</strong></p>
+<p>Unload the Razer Chroma SDK Library before exiting the application.</p>
+<pre><code class="language-C++">// DLL Interface
+EXPORT_API void PluginUnloadLibrarySDK();
+
+// Class Plugin
+ChromaAnimationAPI::UnloadLibrarySDK();</code></pre>
+<hr>
+<p><a name="PluginUnloadLibraryStreamingPlugin"></a>
+<strong>PluginUnloadLibraryStreamingPlugin</strong></p>
+<p>Unload the Razer Chroma Streaming Plugin Library before exiting the application.</p>
+<pre><code class="language-C++">// DLL Interface
+EXPORT_API void PluginUnloadLibraryStreamingPlugin();
+
+// Class Plugin
+ChromaAnimationAPI::UnloadLibraryStreamingPlugin();</code></pre>
+<hr>
 <p><a name="PluginUpdateFrame"></a>
 <strong>PluginUpdateFrame</strong></p>
 <p>Updates the <code>frameIndex</code> of the <code>Chroma</code> animation and sets the <code>duration</code>
@@ -6204,6 +7090,25 @@ EXPORT_API int PluginUpdateFrame(
 int result = ChromaAnimationAPI::UpdateFrame(
     int animationId, int frameIndex, float duration, int* colors, int length);</code></pre>
 <hr>
+<p><a name="PluginUpdateFrameName"></a>
+<strong>PluginUpdateFrameName</strong></p>
+<p>Updates the <code>frameIndex</code> of the <code>Chroma</code> animation and sets the <code>duration</code>
+(in seconds). The <code>color</code> is expected to be an array of the dimensions
+for the <code>deviceType/device</code>. The <code>length</code> parameter is the size of the
+<code>color</code> array. For <code>EChromaSDKDevice1DEnum</code> the array size should be <code>MAX
+LEDS</code>. For <code>EChromaSDKDevice2DEnum</code> the array size should be <code>MAX ROW</code></p>
+<ul>
+<li><code>MAX COLUMN</code>. Returns the animation id upon success. Returns -1 upon
+failure.</li>
+</ul>
+<pre><code class="language-C++">// DLL Interface
+EXPORT_API int PluginUpdateFrameName(
+    const char* path, int frameIndex, float duration, int* colors, int length);
+
+// Class Plugin
+int result = ChromaAnimationAPI::UpdateFrameName(
+    const char* path, int frameIndex, float duration, int* colors, int length);</code></pre>
+<hr>
 <p><a name="PluginUseIdleAnimation"></a>
 <strong>PluginUseIdleAnimation</strong></p>
 <p>When the idle animation flag is true, when no other animations are playing,
@@ -6218,6 +7123,39 @@ EXPORT_API void PluginUseIdleAnimation(
 // Class Plugin
 ChromaAnimationAPI::UseIdleAnimation(
     int device, bool flag);</code></pre>
+<hr>
+<p><a name="PluginUseIdleAnimations"></a>
+<strong>PluginUseIdleAnimations</strong></p>
+<p>Set idle animation flag for all devices.</p>
+<pre><code class="language-C++">// DLL Interface
+EXPORT_API void PluginUseIdleAnimations(bool flag);
+
+// Class Plugin
+ChromaAnimationAPI::UseIdleAnimations(bool flag);</code></pre>
+<hr>
+<p><a name="PluginUsePreloading"></a>
+<strong>PluginUsePreloading</strong></p>
+<p>Set preloading animation flag, which is set to true by default. Reference
+animation by id.</p>
+<pre><code class="language-C++">// DLL Interface
+EXPORT_API void PluginUsePreloading(
+    int animationId, bool flag);
+
+// Class Plugin
+ChromaAnimationAPI::UsePreloading(
+    int animationId, bool flag);</code></pre>
+<hr>
+<p><a name="PluginUsePreloadingName"></a>
+<strong>PluginUsePreloadingName</strong></p>
+<p>Set preloading animation flag, which is set to true by default. Reference
+animation by name.</p>
+<pre><code class="language-C++">// DLL Interface
+EXPORT_API void PluginUsePreloadingName(
+    const char* path, bool flag);
+
+// Class Plugin
+ChromaAnimationAPI::UsePreloadingName(
+    const char* path, bool flag);</code></pre>
 <p><br><br></p>
 <hr>
 
@@ -6228,37 +7166,37 @@ ChromaAnimationAPI::UseIdleAnimation(
 <p><code>PluginPlayComposite</code> automatically handles initializing the <code>ChromaSDK</code>. The named animation files for the <code>.chroma</code> set will be automatically opened. The set of animations will play with looping <code>on</code> or <code>off</code>.</p>
 <pre><code class="language-C++">EXPORT_API void PluginPlayComposite(const char* name, bool loop);
 
-// Given &quot;Random&quot; this will invoke:
-// PluginPlayAnimationName(&quot;Random_ChromaLink.chroma&quot;, loop);
-// PluginPlayAnimationName(&quot;Random_Headset.chroma&quot;, loop);
-// PluginPlayAnimationName(&quot;Random_Keyboard.chroma&quot;, loop);
-// PluginPlayAnimationName(&quot;Random_Keypad.chroma&quot;, loop);
-// PluginPlayAnimationName(&quot;Random_Mouse.chroma&quot;, loop);
-// PluginPlayAnimationName(&quot;Random_Mousepad.chroma&quot;, loop);</code></pre>
+// Given "Random" this will invoke:
+// PluginPlayAnimationName("Random_ChromaLink.chroma", loop);
+// PluginPlayAnimationName("Random_Headset.chroma", loop);
+// PluginPlayAnimationName("Random_Keyboard.chroma", loop);
+// PluginPlayAnimationName("Random_Keypad.chroma", loop);
+// PluginPlayAnimationName("Random_Mouse.chroma", loop);
+// PluginPlayAnimationName("Random_Mousepad.chroma", loop);</code></pre>
 <p><a name="PluginStopComposite"></a>
 <strong>PluginStopComposite</strong></p>
 <p><code>PluginStopComposite</code> automatically handles initializing the <code>ChromaSDK</code>. The named animation files for the <code>.chroma</code> set will be automatically opened. The set of animations will be stopped if playing.</p>
 <pre><code class="language-C++">EXPORT_API void PluginStopComposite(const char* name);
 
-// Given &quot;Random&quot; this will invoke:
-// PluginStopAnimationName(&quot;Random_ChromaLink.chroma&quot;);
-// PluginStopAnimationName(&quot;Random_Headset.chroma&quot;);
-// PluginStopAnimationName(&quot;Random_Keyboard.chroma&quot;);
-// PluginStopAnimationName(&quot;Random_Keypad.chroma&quot;);
-// PluginStopAnimationName(&quot;Random_Mouse.chroma&quot;);
-// PluginStopAnimationName(&quot;Random_Mousepad.chroma&quot;);</code></pre>
+// Given "Random" this will invoke:
+// PluginStopAnimationName("Random_ChromaLink.chroma");
+// PluginStopAnimationName("Random_Headset.chroma");
+// PluginStopAnimationName("Random_Keyboard.chroma");
+// PluginStopAnimationName("Random_Keypad.chroma");
+// PluginStopAnimationName("Random_Mouse.chroma");
+// PluginStopAnimationName("Random_Mousepad.chroma");</code></pre>
 <p><a name="PluginCloseComposite"></a>
 <strong>PluginCloseComposite</strong></p>
 <p><code>PluginCloseComposite</code> closes a set of animations so they can be reloaded from disk. The set of animations will be stopped if playing.</p>
 <pre><code class="language-C++">EXPORT_API void PluginCloseComposite(const char* name);
 
-// Given &quot;Random&quot; this will invoke:
-// PluginCloseAnimationName(&quot;Random_ChromaLink.chroma&quot;);
-// PluginCloseAnimationName(&quot;Random_Headset.chroma&quot;);
-// PluginCloseAnimationName(&quot;Random_Keyboard.chroma&quot;);
-// PluginCloseAnimationName(&quot;Random_Keypad.chroma&quot;);
-// PluginCloseAnimationName(&quot;Random_Mouse.chroma&quot;);
-// PluginCloseAnimationName(&quot;Random_Mousepad.chroma&quot;);</code></pre>
+// Given "Random" this will invoke:
+// PluginCloseAnimationName("Random_ChromaLink.chroma");
+// PluginCloseAnimationName("Random_Headset.chroma");
+// PluginCloseAnimationName("Random_Keyboard.chroma");
+// PluginCloseAnimationName("Random_Keypad.chroma");
+// PluginCloseAnimationName("Random_Mouse.chroma");
+// PluginCloseAnimationName("Random_Mousepad.chroma");</code></pre>
 <p><a name="EChromaSDKDeviceTypeEnum"></a>
 <strong>EChromaSDKDeviceTypeEnum</strong></p>
 <p>The supported device types are <code>1D</code> and <code>2D</code>.</p>
@@ -6291,7 +7229,7 @@ ChromaAnimationAPI::UseIdleAnimation(
 <p>Set an array of animation keys to a static color for the given frame.</p>
 <pre><code class="language-C++">EXPORT_API void PluginSetKeysColorName(const char* path, int frameId, const int* rzkeys, int keyCount, int color);</code></pre>
 <p>Usage:</p>
-<pre><code class="language-C++">const char* animationName = &quot;Blank_Keyboard.chroma&quot;;
+<pre><code class="language-C++">const char* animationName = "Blank_Keyboard.chroma";
 int frameCount = _gMethodGetFrameCountName(animationName);
 
 int wasdKeys[4] =
@@ -6312,7 +7250,7 @@ _gMethodPlayAnimationName(animationName, false);</code></pre>
 <pre><code class="language-C++">EXPORT_API void PluginSetKeysNonZeroColorName(const char* path, int frameId,
   const int* rzkeys, int keyCount, int color);</code></pre>
 <p>Usage:</p>
-<pre><code class="language-C++">const char* animationName = &quot;Blank_Keyboard.chroma&quot;;
+<pre><code class="language-C++">const char* animationName = "Blank_Keyboard.chroma";
 int frameCount = _gMethodGetFrameCountName(animationName);
 
 int wasdKeys[4] =
@@ -6378,7 +7316,7 @@ _gMethodPlayAnimationName(animationName, false);</code></pre>
 <p><strong>Duration: (float)</strong></p>
 <p><strong>Color Array: (int[][])</strong></p>
 </article></div><div style="background-color: #b4b2b2;width: 50px;height:50px;line-height: 50px;text-align: center;position: fixed;bottom: 10px;right: 10px;padding-top:5px;" onclick="document.documentElement.scrollTop = document.body.scrollTop =0;">
-  <svg t="1533629773982" class="icon" style="" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1035" xlink="http://www.w3.org/1999/xlink" width="40" height="40"><defs><style type="text/css">@font-face { font-family: uc-nexus-iconfont; src: url("chrome-extension://pogijhnlcfmcppgimcaccdkmbedjkmhi/res/font_9qmmi8b8jsxxbt9.woff") format("woff"), url("chrome-extension://pogijhnlcfmcppgimcaccdkmbedjkmhi/res/font_9qmmi8b8jsxxbt9.ttf") format("truetype"); }
-  </style></defs><path d="M536.255427 195.182354c-7.804756-7.804756-17.966187-11.615549-28.311813-11.615549-9.43693 0-18.874883 3.449565-26.496467 10.163477-2.360767 1.452071-4.356214 3.267417-6.352685 5.262864L218.47792 455.611735c-15.607466 15.60542-15.607466 40.834011 0 56.43943 15.607466 15.607466 41.558511 15.607466 57.167001 0l193.46013-192.733583 0 600.526219c0 22.1423 17.787108 39.927361 39.927361 39.927361 22.140253 0 39.927361-17.785062 39.927361-39.927361L548.959773 319.317583 737.15704 508.422522c15.607466 15.607466 40.469714 15.607466 56.078203 0 15.607466-15.607466 15.425318-40.834011-0.182149-56.441477L536.255427 195.182354 536.255427 195.182354z" p-id="1036" fill="#333"/><path d="M101.784174 143.097092l816.674071 0c22.140253 0 39.925315-17.785062 39.925315-39.927361 0-22.140253-17.784038-39.925315-39.925315-39.925315L101.784174 63.244416c-22.140253 0-39.927361 17.785062-39.927361 39.925315C61.856813 125.31203 79.643921 143.097092 101.784174 143.097092L101.784174 143.097092z" p-id="1037" fill="#333"/></svg>
+  <svg t="1533629773982" class="icon" style="" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1035" xmlns:xlink="http://www.w3.org/1999/xlink" width="40" height="40"><defs><style type="text/css">@font-face { font-family: uc-nexus-iconfont; src: url("chrome-extension://pogijhnlcfmcppgimcaccdkmbedjkmhi/res/font_9qmmi8b8jsxxbt9.woff") format("woff"), url("chrome-extension://pogijhnlcfmcppgimcaccdkmbedjkmhi/res/font_9qmmi8b8jsxxbt9.ttf") format("truetype"); }
+  </style></defs><path d="M536.255427 195.182354c-7.804756-7.804756-17.966187-11.615549-28.311813-11.615549-9.43693 0-18.874883 3.449565-26.496467 10.163477-2.360767 1.452071-4.356214 3.267417-6.352685 5.262864L218.47792 455.611735c-15.607466 15.60542-15.607466 40.834011 0 56.43943 15.607466 15.607466 41.558511 15.607466 57.167001 0l193.46013-192.733583 0 600.526219c0 22.1423 17.787108 39.927361 39.927361 39.927361 22.140253 0 39.927361-17.785062 39.927361-39.927361L548.959773 319.317583 737.15704 508.422522c15.607466 15.607466 40.469714 15.607466 56.078203 0 15.607466-15.607466 15.425318-40.834011-0.182149-56.441477L536.255427 195.182354 536.255427 195.182354z" p-id="1036" fill="#333"></path><path d="M101.784174 143.097092l816.674071 0c22.140253 0 39.925315-17.785062 39.925315-39.927361 0-22.140253-17.784038-39.925315-39.925315-39.925315L101.784174 63.244416c-22.140253 0-39.927361 17.785062-39.927361 39.925315C61.856813 125.31203 79.643921 143.097092 101.784174 143.097092L101.784174 143.097092z" p-id="1037" fill="#333"></path></svg>
 </div>
 </body></html>
